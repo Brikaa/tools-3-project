@@ -1,5 +1,6 @@
-- backend-builder
-- frontend-builder
+- builders
+  - backend-builder
+  - frontend-builder
 
 - runners
   - backend

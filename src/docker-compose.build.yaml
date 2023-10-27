@@ -1,0 +1,9 @@
+services:
+  backend_builder:
+    container_name: backend_builder
+    image: mcr.microsoft.com/dotnet/sdk:7.0
+    network_mode: bridge
+    working_dir: /app
+    volumes:
+      - ./Backend:/app
+    command: ["dotnet", "build", "--configuration", "Release"]
