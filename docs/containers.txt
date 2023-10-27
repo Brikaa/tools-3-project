@@ -1,0 +1,8 @@
+- backend-builder
+- frontend-builder
+
+- runners
+  - backend
+  - frontend
+  - database
+  - redis
