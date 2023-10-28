@@ -1,0 +1,9 @@
+Auth()
+
+/sign-up
+  - user = model select user by name
+  - if (user) return 400 "A user with this name already exists"
+  - model insert user
+  - return 200
+/sign-in
+  -

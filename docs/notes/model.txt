@@ -1,0 +1,39 @@
+- User
+  - id: UUID
+  - name: string UNIQUE
+  - password: string
+  - role: 'doctor' | 'patient'
+
+- Slot
+  - id: UUID
+  - start: timestamp
+  - end: timestamp
+  - doctorId: UUID (FK_SLOT_DOCTOR to User) NOT NULL
+  - patientId: UUID (FK_SLOT_PATIENT to User)
+
+- Business rules
+  - User name must be unique
+  - Slots can only be created by doctors
+  - FK_SLOT_DOCTOR, User must have role doctor
+  - FK_SLOT_PATIENT, User must have role patient
+  - patientId can only be swapped with NULL
+  - On inserting new slot, can't have a slot with target.start >= start && target.end <= end for the same doctor
+  - On cancelling an appointment, can't have start <= now
+
+- Flow
+  - Sign up
+    - Insert the data
+  - Sign in
+    - password == password
+  - Insert slot
+    - Insert the data, while checking the business rules
+  - View doctor and slots
+    - select name, id from User where role = 'doctor', select slots by doctorId where patientId = null
+  - Make appointment
+    - Update slot set patientId = target.userId
+  - Update appointment
+    - Update old slot patientId to null, make new appointment
+  - Cancel appointment
+    - Update slot set patientId = null
+  - View all appointments
+    - Select from slot
