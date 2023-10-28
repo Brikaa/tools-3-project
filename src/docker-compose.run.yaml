@@ -1,7 +1,24 @@
+volumes:
+  database:
+    external: false
+
 services:
   backend_runner:
     container_name: backend_runner
     image: backend_runner
     build: ./backend
     ports:
-      - "8000:8000"
+      - '8000:8000'
+    depends_on:
+      - database
+  database:
+    container_name: database
+    image: database
+    build: ./backend/db
+    volumes:
+      - database:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
