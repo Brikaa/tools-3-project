@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS Slot
 
 CREATE TABLE User (
   `id` BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) PRIMARY KEY,
-  `name` varchar(255) UNIQUE NOT NULL,
+  `username` varchar(255) UNIQUE NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` ENUM('patient', 'doctor') NOT NULL
 )

@@ -1,6 +1,6 @@
 - User
   - id: UUID
-  - name: string UNIQUE
+  - username: string UNIQUE
   - password: string
   - role: 'doctor' | 'patient'
 
@@ -12,7 +12,7 @@
   - patientId: UUID (FK_SLOT_PATIENT to User)
 
 - Business rules
-  - User name must be unique
+  - Username must be unique
   - Slots can only be created by doctors
   - FK_SLOT_DOCTOR, User must have role doctor
   - FK_SLOT_PATIENT, User must have role patient
@@ -28,7 +28,7 @@
   - Insert slot
     - Insert the data, while checking the business rules
   - View doctor and slots
-    - select name, id from User where role = 'doctor', select slots by doctorId where patientId = null
+    - select username, id from User where role = 'doctor', select slots by doctorId where patientId = null
   - Make appointment
     - Update slot set patientId = target.userId
   - Update appointment
