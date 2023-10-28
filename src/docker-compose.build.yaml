@@ -1,9 +1,14 @@
+volumes:
+  backend_builder_packages:
+    external: false
+
 services:
   backend_builder:
     container_name: backend_builder
-    image: mcr.microsoft.com/dotnet/sdk:7.0
+    image: golang:1.21.3-alpine3.18
     network_mode: bridge
     working_dir: /app
     volumes:
-      - ./Backend:/app
-    command: ["dotnet", "build", "--configuration", "Release"]
+      - ./backend:/app
+      - backend_builder_packages:/go/pkg
+    command: /bin/sh -c "go get . && go build -o bin/backend"

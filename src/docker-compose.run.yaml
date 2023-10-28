@@ -1,0 +1,7 @@
+services:
+  backend_runner:
+    container_name: backend_runner
+    image: backend_runner
+    build: ./backend
+    ports:
+      - "8000:8000"
