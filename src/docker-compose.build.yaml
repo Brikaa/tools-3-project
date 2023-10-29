@@ -11,4 +11,4 @@ services:
     volumes:
       - ./backend:/app
       - backend_builder_packages:/go/pkg
-    command: /bin/sh -c "go get . && go build -o bin/backend"
+    command: /bin/sh -c "go get . && exec go build -o bin/backend"
