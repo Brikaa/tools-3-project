@@ -37,6 +37,7 @@ func main() {
 	fmt.Println("Successfully pinged the DBMS")
 	router.GET("/health", health)
 	router.POST("/signup", controller.Signup)
+	router.POST("/login", controller.Login)
 
 	router.Run(":8000")
 }

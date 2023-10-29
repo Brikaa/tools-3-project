@@ -1,0 +1,4 @@
+- Create user with invalid username, non alnum, empty
+- Log in with invalid username
+- Log in with invalid password
+- Log in with valid username and password
