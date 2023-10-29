@@ -10,7 +10,12 @@ services:
     ports:
       - '8000:8000'
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+    environment:
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
   database:
     container_name: database
     image: database
@@ -22,3 +27,8 @@ services:
       - MYSQL_DATABASE=app
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
