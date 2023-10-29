@@ -1,6 +1,6 @@
 - AuthMiddleware(role?)
   return (c) => {
-    - user = model select user by username and password
+    - user = repo select user by c.username and c.password
     - if (!user) return 401
     - if (role && user.role != role)
       - return 403
@@ -8,35 +8,32 @@
     - c.next()
   }
 
-- Auth(fn, role?) {
-  - user = model select user by username and password
-  - if (!user) return (c) => {
-    return 401
-  }
-  - if (role && user.role != role) return (c) => {
-    return 403
-  }
-  userContext = createContext(user)
-  return fn(userContext)
-}
-
-- FunctionThanNeedsAuth(userContext)
-  - return (c) => {
-    - do stuff with userContext
-    - return json stuff
+- Auth(fn, db, role?)
+  return (c) => {
+    - user = repo(db) select user by c.username and c.password
+    - if (!user)
+      - c.return 401
+    - if (role && user.role != role)
+      - c.return 403
+    - userContext = createContext(user)
+    - fn(userContext, c)
   }
 
-- router.post("something", Auth(FunctionThatNeedsAuth, "admin"))
+- FunctionThanNeedsAuth(userContext, c)
+  - do stuff with userContext
+  - return json stuff with c
+
+- router.post("something", Auth(FunctionThatNeedsAuth, db, "doctor"))
 
 - Business rules
   - Username must only contain letters and numbers
 
 - POST /sign-up
-  - user = model select user by name
+  - user = repo select user by name
   - if (user) return 400 "A user with this name already exists"
-  - model insert user
+  - repo insert user
   - return 200
 - POST /sign-in
-  - user = model select user by username and password
+  - user = repo select user by username and password
   - if (!user) return 400 "Invalid name or password"
   - return { "token": base64encode("username:password") }
