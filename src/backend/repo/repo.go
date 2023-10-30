@@ -18,6 +18,17 @@ func selectOne[T any](db *sql.DB, query string, arguments []any, entity *T, rows
 	return entity, nil
 }
 
+func insert(db *sql.DB, query string, arguments []any) error {
+	result, err := db.Exec(query, arguments...)
+	if err != nil {
+		return fmt.Errorf("%v", err)
+	}
+	if _, err := result.LastInsertId(); err != nil {
+		return fmt.Errorf("%v", err)
+	}
+	return nil
+}
+
 func selectOneUser(db *sql.DB, condition string, arguments []any) (*model.User, error) {
 	var user model.User
 	return selectOne(db,
@@ -33,16 +44,12 @@ func SelectUserByUsernameAndPassword(db *sql.DB, username string, password strin
 	return selectOneUser(db, "username = ? AND password = ?", []any{username, password})
 }
 
-func InsertUser(db *sql.DB, user *model.User) error {
-	result, err := db.Exec(
-		"INSERT INTO User (username, password, role) VALUES (?, ?, ?)", user.Username, user.Password, user.Role)
-	if err != nil {
-		return fmt.Errorf("%v", err)
-	}
-	if _, err := result.LastInsertId(); err != nil {
-		return fmt.Errorf("%v", err)
-	}
-	return nil
+func InsertUser(db *sql.DB, username, password, role string) error {
+	return insert(
+		db,
+		"INSERT INTO User (username, password, role) VALUES (?, ?, ?)",
+		[]any{username, password, role},
+	)
 }
 
 func GetOverlappingSlot(db *sql.DB, doctorId string, start time.Time, end time.Time) (*model.Slot, error) {
@@ -53,5 +60,13 @@ func GetOverlappingSlot(db *sql.DB, doctorId string, start time.Time, end time.T
 		[]any{doctorId, start, end},
 		&slot,
 		[]any{&slot.ID},
+	)
+}
+
+func InsertSlot(db *sql.DB, start time.Time, end time.Time, doctorId string) error {
+	return insert(
+		db,
+		"INSERT INTO Slot (start, end, doctorId) VALUES (?, ?, ?)",
+		[]any{start, end, doctorId},
 	)
 }

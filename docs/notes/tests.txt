@@ -3,3 +3,5 @@
 - Log in with invalid password (OK)
 - Log in with valid username and password, check ID encoding
 - Invalid Authorization scheme
+- Insert slot
+- Insert slot with overlap

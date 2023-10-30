@@ -72,3 +72,6 @@
 - TODO
   - migrate
   - update login to encode using the user id instead
+
+- Nice to have
+  - Abstract the time_format

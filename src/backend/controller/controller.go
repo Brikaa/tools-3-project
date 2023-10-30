@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
-	"github.com/Brikaa/tools-3-project/src/backend/model"
 	"github.com/Brikaa/tools-3-project/src/backend/repo"
 	g "github.com/gin-gonic/gin"
 )
@@ -32,6 +32,11 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type InsertSlotRequest struct {
+	Start time.Time `json:"start" time_format:"RFC3339"`
+	End   time.Time `json:"end" time_format:"RFC3339"`
+}
+
 type UserContext struct {
 	Id   string
 	Role string
@@ -45,28 +50,33 @@ func errorResponse(message string) *g.H {
 	return &g.H{"message": message}
 }
 
+func handleInternalServerError(ctx *g.Context, err *error) {
+	log.Print(err)
+	ctx.Status(http.StatusInternalServerError)
+}
+
 var allowedRoles = map[string]bool{"doctor": true, "patient": true}
 var isAlNum = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
-func (controller Controller) auth(role string) func(*g.Context) {
-	return func(c *g.Context) {
-		authHeader := c.GetHeader("Authorization")
+func (controller Controller) auth(role string, fn func(*UserContext, *g.Context)) func(*g.Context) {
+	return func(ctx *g.Context) {
+		authHeader := ctx.GetHeader("Authorization")
 		authData := strings.Split(authHeader, " ")
 		if len(authData) != 2 {
-			c.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization header"))
+			ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization header"))
 			return
 		}
 
 		scheme := authData[0]
 		token := authData[1]
 		if !strings.EqualFold(scheme, "Basic") {
-			c.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization scheme"))
+			ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization scheme"))
 			return
 		}
 
 		userpass, err := base64.StdEncoding.DecodeString(token)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
+			handleInternalServerError(ctx, &err)
 			return
 		}
 		userpassData := strings.Split(string(userpass), ":")
@@ -75,20 +85,21 @@ func (controller Controller) auth(role string) func(*g.Context) {
 
 		user, dbErr := repo.SelectUserByUsernameAndPassword(controller.db, username, password)
 		if dbErr != nil {
-			c.Status(http.StatusInternalServerError)
+			handleInternalServerError(ctx, &dbErr)
 			return
 		}
 		if user == nil {
-			c.Status(http.StatusUnauthorized)
+			ctx.Status(http.StatusUnauthorized)
 			return
 		}
 
 		if role != "*" && user.Role != role {
-			c.Status(http.StatusForbidden)
+			ctx.Status(http.StatusForbidden)
 			return
 		}
 
-		c.Next()
+		userContext := createUserContext(user.ID, user.Role)
+		fn(userContext, ctx)
 	}
 }
 
@@ -111,17 +122,16 @@ func (controller Controller) Signup(ctx *g.Context) {
 	}
 	user, err := repo.SelectUserByUsername(controller.db, req.Username)
 	if err != nil {
-		log.Print(err)
-		ctx.Status(http.StatusInternalServerError)
+		handleInternalServerError(ctx, &err)
 		return
 	}
 	if user != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("A user with this username already exists"))
+		return
 	}
-	newUser := model.CreateUser(req.Username, req.Password, req.Role)
-	if err := repo.InsertUser(controller.db, newUser); err != nil {
-		log.Print(err)
-		ctx.Status(http.StatusInternalServerError)
+	if err := repo.InsertUser(controller.db, req.Username, req.Password, req.Role); err != nil {
+		handleInternalServerError(ctx, &err)
+		return
 	}
 	ctx.Status(http.StatusOK)
 }
@@ -133,8 +143,7 @@ func (controller Controller) Login(ctx *g.Context) {
 	}
 	user, err := repo.SelectUserByUsernameAndPassword(controller.db, req.Username, req.Password)
 	if err != nil {
-		log.Print(err)
-		ctx.Status(http.StatusInternalServerError)
+		handleInternalServerError(ctx, &err)
 		return
 	}
 	if user == nil {
@@ -143,5 +152,25 @@ func (controller Controller) Login(ctx *g.Context) {
 	}
 	ctx.IndentedJSON(http.StatusOK,
 		g.H{"token": base64.StdEncoding.EncodeToString([]byte(user.ID + ":" + user.Password))})
-	return
+}
+
+func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
+	var req InsertSlotRequest
+	if err := ctx.BindJSON(&req); err != nil {
+		return
+	}
+	overlap, err := repo.GetOverlappingSlot(controller.db, userCtx.Id, req.Start, req.End)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	if overlap != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, errorResponse(overlap.ID+" slot overlaps with this configuration"))
+		return
+	}
+	if err := repo.InsertSlot(controller.db, req.Start, req.End, userCtx.Id); err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	ctx.Status(http.StatusCreated)
 }

@@ -9,10 +9,6 @@ type User struct {
 	Role     string
 }
 
-func CreateUser(username, password, role string) *User {
-	return &User{Username: username, Password: password, Role: role}
-}
-
 type Slot struct {
 	ID        string
 	Start     time.Time
