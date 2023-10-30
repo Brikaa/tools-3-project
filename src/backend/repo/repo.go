@@ -70,3 +70,15 @@ func InsertSlot(db *sql.DB, start time.Time, end time.Time, doctorId string) err
 		[]any{start, end, doctorId},
 	)
 }
+
+func DeleteSlotByIdAndDoctorId(db *sql.DB, slotId string, doctorId string) (bool, error) {
+	result, err := db.Exec("DELETE FROM Slot WHERE id = ? AND doctorId = ?", slotId, doctorId)
+	if err != nil {
+		return false, fmt.Errorf("%v", err)
+	}
+	rowsAffected, rErr := result.RowsAffected()
+	if rErr != nil {
+		return false, fmt.Errorf("%v", err)
+	}
+	return rowsAffected >= 1, nil
+}

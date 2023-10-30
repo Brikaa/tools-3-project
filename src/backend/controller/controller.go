@@ -52,25 +52,25 @@ func errorResponse(message string) *g.H {
 
 func handleInternalServerError(ctx *g.Context, err *error) {
 	log.Print(err)
-	ctx.Status(http.StatusInternalServerError)
+	ctx.AbortWithStatus(http.StatusInternalServerError)
 }
 
 var allowedRoles = map[string]bool{"doctor": true, "patient": true}
 var isAlNum = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
-func (controller Controller) auth(role string, fn func(*UserContext, *g.Context)) func(*g.Context) {
+func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)) func(*g.Context) {
 	return func(ctx *g.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 		authData := strings.Split(authHeader, " ")
 		if len(authData) != 2 {
-			ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization header"))
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Invalid authorization header"))
 			return
 		}
 
 		scheme := authData[0]
 		token := authData[1]
 		if !strings.EqualFold(scheme, "Basic") {
-			ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization scheme"))
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Invalid authorization scheme"))
 			return
 		}
 
@@ -89,12 +89,12 @@ func (controller Controller) auth(role string, fn func(*UserContext, *g.Context)
 			return
 		}
 		if user == nil {
-			ctx.Status(http.StatusUnauthorized)
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		if role != "*" && user.Role != role {
-			ctx.Status(http.StatusForbidden)
+			ctx.AbortWithStatus(http.StatusForbidden)
 			return
 		}
 
@@ -109,15 +109,15 @@ func (controller Controller) Signup(ctx *g.Context) {
 		return
 	}
 	if _, ok := allowedRoles[req.Role]; !ok {
-		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid role"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Invalid role"))
 		return
 	}
 	if !isAlNum(req.Username) {
-		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Username can only contain alphabetic or numeric characters"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Username can only contain alphabetic or numeric characters"))
 		return
 	}
 	if len(req.Username) == 0 {
-		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Username must be non-empty"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Username must be non-empty"))
 		return
 	}
 	user, err := repo.SelectUserByUsername(controller.db, req.Username)
@@ -126,7 +126,7 @@ func (controller Controller) Signup(ctx *g.Context) {
 		return
 	}
 	if user != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("A user with this username already exists"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("A user with this username already exists"))
 		return
 	}
 	if err := repo.InsertUser(controller.db, req.Username, req.Password, req.Role); err != nil {
@@ -147,7 +147,7 @@ func (controller Controller) Login(ctx *g.Context) {
 		return
 	}
 	if user == nil {
-		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid username or password"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Invalid username or password"))
 		return
 	}
 	ctx.IndentedJSON(http.StatusOK,
@@ -165,11 +165,11 @@ func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
 		return
 	}
 	if !req.Start.Before(req.End) {
-		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("The slot must start before it ends"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("The slot must start before it ends"))
 		return
 	}
 	if overlap != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, errorResponse(overlap.ID+" slot overlaps with this configuration"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse(overlap.ID+" slot overlaps with this configuration"))
 		return
 	}
 	if err := repo.InsertSlot(controller.db, req.Start, req.End, userCtx.Id); err != nil {
@@ -177,4 +177,17 @@ func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
 		return
 	}
 	ctx.Status(http.StatusCreated)
+}
+
+func (controller Controller) DeleteSlot(userCtx *UserContext, ctx *g.Context) {
+	deleted, err := repo.DeleteSlotByIdAndDoctorId(controller.db, ctx.Param("id"), userCtx.Id)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	if !deleted {
+		ctx.AbortWithStatus(404)
+		return
+	}
+	ctx.Status(200)
 }
