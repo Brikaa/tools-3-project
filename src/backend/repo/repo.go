@@ -41,6 +41,33 @@ func update(db *sql.DB, query string, arguments []any) (bool, error) {
 	return rowsAffected >= 1, nil
 }
 
+func selectAll[T any](
+	db *sql.DB,
+	query string,
+	arguments []any,
+	fn func(*sql.Rows, *T) error,
+) ([]*T, error) {
+	var entities []*T
+
+	rows, err := db.Query(query, arguments...)
+	if err != nil {
+		return nil, fmt.Errorf("%v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var entity T
+		if err := fn(rows, &entity); err != nil {
+			return nil, fmt.Errorf("%v", err)
+		}
+		entities = append(entities, &entity)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%v", err)
+	}
+	return entities, nil
+}
+
 func selectOneUser(db *sql.DB, condition string, arguments []any) (*model.User, error) {
 	var user model.User
 	return &user, selectOne(db,
@@ -86,28 +113,35 @@ func DeleteSlotByIdAndDoctorId(db *sql.DB, slotId string, doctorId string) (bool
 	return update(db, "DELETE FROM Slot WHERE id = ? AND doctorId = ?", []any{slotId, doctorId})
 }
 
-func GetSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.SlotXReserved, error) {
-	var slots []*model.SlotXReserved
-
-	rows, err := db.Query(
-		`SELECT Slot.id, Slot.start, Slot.end, (Appointment.id IS NOT NULL) AS reserved FROM Slot WHERE doctorId = ?
-LEFT JOIN Appointment ON Appointment.slotId = Slot.id ORDER BY Slot.start`,
-		doctorId,
+func GetSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, error) {
+	return selectAll(
+		db,
+		"SELECT Slot.id, Slot.start, Slot.end FROM Slot WHERE doctorId = ?",
+		[]any{doctorId},
+		func(rows *sql.Rows, slot *model.Slot) error {
+			return rows.Scan(&slot.ID, &slot.Start, &slot.End)
+		},
 	)
-	if err != nil {
-		return nil, fmt.Errorf("%q: %v", doctorId, err)
-	}
-	defer rows.Close()
+}
 
-	for rows.Next() {
-		var slot model.SlotXReserved
-		if err := rows.Scan(&slot.ID, &slot.Start, &slot.End, &slot.Reserved); err != nil {
-			return nil, fmt.Errorf("%q: %v", doctorId, err)
-		}
-		slots = append(slots, &slot)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%q: %v", doctorId, err)
-	}
-	return slots, nil
+func GetAppointmentsByDoctorId(db *sql.DB, doctorId string) ([]*model.AppointmentXSlotXPatient, error) {
+	return selectAll(
+		db,
+		`SELECT Appointment.id, Slot.id, Slot.start, Slot.end, Patient.id, Patient.username
+FROM Appointment WHERE Doctor.id = ?
+LEFT JOIN Slot ON Appointment.slotId = Slot.id
+LEFT JOIN User as Patient ON Appointment.patientId = Patient.id
+LEFT JOIN User as Doctor ON Slot.doctorId = Doctor.id`,
+		[]any{doctorId},
+		func(rows *sql.Rows, appointment *model.AppointmentXSlotXPatient) error {
+			return rows.Scan(
+				&appointment.ID,
+				&appointment.SlotID,
+				&appointment.SlotStart,
+				&appointment.SlotEnd,
+				&appointment.PatientID,
+				&appointment.PatientUsername,
+			)
+		},
+	)
 }

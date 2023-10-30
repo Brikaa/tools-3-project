@@ -207,3 +207,12 @@ func (controller Controller) GetSlots(userCtx *UserContext, ctx *g.Context) {
 	}
 	ctx.IndentedJSON(http.StatusOK, g.H{"slots": slots})
 }
+
+func (controller Controller) GetDoctorAppointments(userCtx *UserContext, ctx *g.Context) {
+	appointments, err := repo.GetAppointmentsByDoctorId(controller.db, userCtx.Id)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, g.H{"appointments": appointments})
+}

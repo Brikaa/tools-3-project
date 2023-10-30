@@ -36,6 +36,8 @@
   - 201
 - GET /slots (auth doctor)
   - repo select slots where doctorId = userId order by start
+- GET /doctor-appointments (auth doctor)
+  - repo select appointments where slot.doctorId = userId order by slot.start
 - DELETE /slots/{id} (auth doctor)
   - noDeleted = repo delete where id = req.id and doctorId = userId
   - if noDeleted == 0

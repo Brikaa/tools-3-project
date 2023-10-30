@@ -42,6 +42,7 @@ func main() {
 	router.PUT("/slots", controller.Auth("doctor", controller.InsertSlot))
 	router.DELETE("/slots/:id", controller.Auth("doctor", controller.DeleteSlot))
 	router.GET("/slots", controller.Auth("doctor", controller.GetSlots))
+	router.GET("/doctor-appointments", controller.Auth("doctor", controller.GetDoctorAppointments))
 
 	router.Run(":8000")
 }

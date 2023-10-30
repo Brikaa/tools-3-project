@@ -13,10 +13,18 @@ type Slot struct {
 	ID       string
 	Start    time.Time
 	End      time.Time
-	DoctorId string
+	DoctorID string
 }
 
-type SlotXReserved struct {
-	Slot
-	Reserved bool
+type Appointment struct {
+	ID        string
+	SlotID    string
+	PatientID string
+}
+
+type AppointmentXSlotXPatient struct {
+	Appointment
+	SlotStart       time.Time
+	SlotEnd         time.Time
+	PatientUsername string
 }
