@@ -164,6 +164,10 @@ func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
 		handleInternalServerError(ctx, &err)
 		return
 	}
+	if !req.Start.Before(req.End) {
+		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("The slot must start before it ends"))
+		return
+	}
 	if overlap != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, errorResponse(overlap.ID+" slot overlaps with this configuration"))
 		return
