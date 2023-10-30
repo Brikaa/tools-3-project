@@ -36,13 +36,17 @@ func main() {
 
 	router := g.Default()
 	router.GET("/health", health)
+
 	controller := controller.CreateController(db)
 	router.POST("/signup", controller.Signup)
 	router.POST("/login", controller.Login)
+
 	router.PUT("/slots", controller.Auth("doctor", controller.InsertSlot))
 	router.DELETE("/slots/:id", controller.Auth("doctor", controller.DeleteSlot))
 	router.GET("/slots", controller.Auth("doctor", controller.GetSlots))
 	router.GET("/doctor-appointments", controller.Auth("doctor", controller.GetDoctorAppointments))
+
+	router.GET("/appointments", controller.Auth("patient", controller.GetDoctorAppointments))
 
 	router.Run(":8000")
 }

@@ -130,8 +130,8 @@ func GetAppointmentsByDoctorId(db *sql.DB, doctorId string) ([]*model.Appointmen
 		`SELECT Appointment.id, Slot.id, Slot.start, Slot.end, Patient.id, Patient.username
 FROM Appointment WHERE Doctor.id = ?
 LEFT JOIN Slot ON Appointment.slotId = Slot.id
-LEFT JOIN User as Patient ON Appointment.patientId = Patient.id
-LEFT JOIN User as Doctor ON Slot.doctorId = Doctor.id`,
+LEFT JOIN User AS Patient ON Appointment.patientId = Patient.id
+LEFT JOIN User AS Doctor ON Slot.doctorId = Doctor.id`,
 		[]any{doctorId},
 		func(rows *sql.Rows, appointment *model.AppointmentXSlotXPatient) error {
 			return rows.Scan(
@@ -141,6 +141,28 @@ LEFT JOIN User as Doctor ON Slot.doctorId = Doctor.id`,
 				&appointment.SlotEnd,
 				&appointment.PatientID,
 				&appointment.PatientUsername,
+			)
+		},
+	)
+}
+
+func GetAppointmentsByPatientId(db *sql.DB, patientId string) ([]*model.AppointmentXSlotXDoctor, error) {
+	return selectAll(
+		db,
+		`SELECT Appointment.id, Slot.id, Slot.start, Slot.end, Doctor.id, Doctor.username
+FROM Appointment WHERE Patient.id = ?
+LEFT JOIN Slot ON Appointment.slotID = Slot.id
+LEFT JOIN User AS Patient ON Appointment.patientId = Patient.id
+LEFT JOIN USER AS Doctor ON Slot.doctorId = Doctor.id`,
+		[]any{patientId},
+		func(rows *sql.Rows, appointment *model.AppointmentXSlotXDoctor) error {
+			return rows.Scan(
+				&appointment.ID,
+				&appointment.SlotID,
+				&appointment.SlotStart,
+				&appointment.SlotEnd,
+				&appointment.DoctorID,
+				&appointment.DoctorUsername,
 			)
 		},
 	)
