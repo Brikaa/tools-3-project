@@ -17,7 +17,6 @@ func health(c *g.Context) {
 }
 
 func main() {
-	router := g.Default()
 	cfg := mysql.Config{
 		User:      os.Getenv("MYSQL_USER"),
 		Passwd:    os.Getenv("MYSQL_PASSWORD"),
@@ -30,17 +29,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Fatal(pingErr)
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
 	}
-	controller := controller.CreateController(db)
 	fmt.Println("Successfully pinged the DBMS")
+
+	router := g.Default()
 	router.GET("/health", health)
+	controller := controller.CreateController(db)
 	router.POST("/signup", controller.Signup)
 	router.POST("/login", controller.Login)
 	router.PUT("/slots", controller.Auth("doctor", controller.InsertSlot))
 	router.DELETE("/slots/:id", controller.Auth("doctor", controller.DeleteSlot))
+	router.GET("/slots", controller.Auth("doctor", controller.GetSlots))
 
 	router.Run(":8000")
 }

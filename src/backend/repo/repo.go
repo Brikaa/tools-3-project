@@ -29,6 +29,18 @@ func insert(db *sql.DB, query string, arguments []any) error {
 	return nil
 }
 
+func update(db *sql.DB, query string, arguments []any) (bool, error) {
+	result, err := db.Exec(query, arguments...)
+	if err != nil {
+		return false, fmt.Errorf("%v", err)
+	}
+	rowsAffected, rErr := result.RowsAffected()
+	if rErr != nil {
+		return false, fmt.Errorf("%v", err)
+	}
+	return rowsAffected >= 1, nil
+}
+
 func selectOneUser(db *sql.DB, condition string, arguments []any) (*model.User, error) {
 	var user model.User
 	return &user, selectOne(db,
@@ -71,45 +83,31 @@ func InsertSlot(db *sql.DB, start time.Time, end time.Time, doctorId string) err
 }
 
 func DeleteSlotByIdAndDoctorId(db *sql.DB, slotId string, doctorId string) (bool, error) {
-	result, err := db.Exec("DELETE FROM Slot WHERE id = ? AND doctorId = ?", slotId, doctorId)
-	if err != nil {
-		return false, fmt.Errorf("%v", err)
-	}
-	rowsAffected, rErr := result.RowsAffected()
-	if rErr != nil {
-		return false, fmt.Errorf("%v", err)
-	}
-	return rowsAffected >= 1, nil
+	return update(db, "DELETE FROM Slot WHERE id = ? AND doctorId = ?", []any{slotId, doctorId})
 }
 
-func GetSlotsByUserId(db *sql.DB, userId string) ([]*model.SlotXDoctorXPatient, error) {
-	var slots []*model.SlotXDoctorXPatient
+func GetSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.SlotXReserved, error) {
+	var slots []*model.SlotXReserved
 
 	rows, err := db.Query(
-		`SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId, Doctor.name, Slot.patientId, Patient.name
-FROM Slot WHERE patientId = ? OR doctorId = ?
-LEFT JOIN User As Doctor on Slot.doctorId = Doctor.id
-LEFT Join User As Patient on Slot.patientId = Patient.id
-ORDER BY Slot.start`,
-		userId,
-		userId,
+		`SELECT Slot.id, Slot.start, Slot.end, (Appointment.id IS NOT NULL) AS reserved FROM Slot WHERE doctorId = ?
+LEFT JOIN Appointment ON Appointment.slotId = Slot.id ORDER BY Slot.start`,
+		doctorId,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%q: %v", userId, err)
+		return nil, fmt.Errorf("%q: %v", doctorId, err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var slot model.SlotXDoctorXPatient
-		if err := rows.Scan(
-			&slot.ID, &slot.Start, &slot.End, &slot.DoctorId, &slot.DoctorName, &slot.PatientId, &slot.PatientName,
-		); err != nil {
-			return nil, fmt.Errorf("%q: %v", userId, err)
+		var slot model.SlotXReserved
+		if err := rows.Scan(&slot.ID, &slot.Start, &slot.End, &slot.Reserved); err != nil {
+			return nil, fmt.Errorf("%q: %v", doctorId, err)
 		}
 		slots = append(slots, &slot)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%q: %v", userId, err)
+		return nil, fmt.Errorf("%q: %v", doctorId, err)
 	}
 	return slots, nil
 }

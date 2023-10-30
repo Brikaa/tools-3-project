@@ -1,14 +1,4 @@
-- AuthMiddleware(role?)
-  return (c) => {
-    - user = repo select user by c.username and c.password
-    - if (!user) return 401
-    - if (role && user.role != role)
-      - return 403
-    - c.userContext = createContext(user)
-    - c.next()
-  }
-
-- Auth(fn, db, role?)
+- Auth(role, fn)
   return (c) => {
     - user = repo(db) select user by c.username and c.password
     - if (!user)
@@ -23,7 +13,7 @@
   - do stuff with userContext
   - return json stuff with c
 
-- router.post("something", Auth(FunctionThatNeedsAuth, db, "doctor"))
+- router.post("something", Auth("doctor", FunctionThatNeedsAuth))
 
 - Business rules
   - Username must only contain letters and numbers
@@ -44,22 +34,24 @@
     - 400
   - repo insert slot
   - 201
+- GET /slots (auth doctor)
+  - repo select slots where doctorId = userId order by start
 - DELETE /slots/{id} (auth doctor)
   - noDeleted = repo delete where id = req.id and doctorId = userId
   - if noDeleted == 0
     - 404
   - 200
 
-- GET /slots (auth)
-  - repo select slots where patientId = userId or doctorId = userId order by start
-
-- POST /slots/{id}/reserve (auth patient)
-  - updated = repo update slots where id = req.id and patientId = null set patientId = userId
-  - if updated = 0
-    - 404
+- GET /appointments (auth patient)
+  - repo select appointments where patientId = userId order by start
+- PUT /appointments (auth patient)
+  - reserved = repo select appointment where slot.id = req.slotId
+    - if reserved != null
+      - 400
+  - updated = repo insert into appointment
   - 200
-- POST /slots/{id}/cancel (auth patient)
-  - updated = repo update slots where id = req.id and patientId = userId set patientId = null
+- DELETE /appointments/{id} (auth patient)
+  - updated = repo delete from appointments where id = req.id and patientId = userId
   - if updated = 0
     - 404
   - 200
@@ -67,11 +59,12 @@
 - GET /doctors (auth patient)
   - doctors = select id, username from doctors
 - GET /doctors/{id}/slots (auth patient)
-  - slots = select slots where doctorId = req.id and patientId = null
+  - slots = select Slot where Slot.doctorId = req.id and Appointment.id = null left join Appointment
 
 - TODO
   - migrate
   - update login to encode using the user id instead
 
 - Nice to have
+  - Transactions
   - Abstract the time_format

@@ -10,15 +10,13 @@ type User struct {
 }
 
 type Slot struct {
-	ID        string
-	Start     time.Time
-	End       time.Time
-	DoctorId  string
-	PatientId string
+	ID       string
+	Start    time.Time
+	End      time.Time
+	DoctorId string
 }
 
-type SlotXDoctorXPatient struct {
+type SlotXReserved struct {
 	Slot
-	PatientName string
-	DoctorName  string
+	Reserved bool
 }

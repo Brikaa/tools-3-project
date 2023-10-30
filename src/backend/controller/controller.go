@@ -200,7 +200,7 @@ func (controller Controller) DeleteSlot(userCtx *UserContext, ctx *g.Context) {
 }
 
 func (controller Controller) GetSlots(userCtx *UserContext, ctx *g.Context) {
-	slots, err := repo.GetSlotsByUserId(controller.db, userCtx.Id)
+	slots, err := repo.GetSlotsByDoctorId(controller.db, userCtx.Id)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
