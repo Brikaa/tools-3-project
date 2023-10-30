@@ -8,22 +8,23 @@ import (
 	"os"
 
 	"github.com/Brikaa/tools-3-project/src/backend/controller"
-	"github.com/gin-gonic/gin"
+	g "github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
 )
 
-func health(c *gin.Context) {
+func health(c *g.Context) {
 	c.String(http.StatusOK, "Up and running")
 }
 
 func main() {
-	router := gin.Default()
+	router := g.Default()
 	cfg := mysql.Config{
-		User:   os.Getenv("MYSQL_USER"),
-		Passwd: os.Getenv("MYSQL_PASSWORD"),
-		Net:    "tcp",
-		Addr:   "database:3306",
-		DBName: "app",
+		User:      os.Getenv("MYSQL_USER"),
+		Passwd:    os.Getenv("MYSQL_PASSWORD"),
+		Net:       "tcp",
+		Addr:      "database:3306",
+		DBName:    "app",
+		ParseTime: true,
 	}
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {

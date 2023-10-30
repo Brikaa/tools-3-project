@@ -1,4 +1,5 @@
 - Create user with invalid username, non alnum, empty
-- Log in with invalid username
-- Log in with invalid password
-- Log in with valid username and password
+- Log in with invalid username (OK)
+- Log in with invalid password (OK)
+- Log in with valid username and password, check ID encoding
+- Invalid Authorization scheme

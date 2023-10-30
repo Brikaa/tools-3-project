@@ -28,12 +28,47 @@
 - Business rules
   - Username must only contain letters and numbers
 
-- POST /sign-up
-  - user = repo select user by name
-  - if (user) return 400 "A user with this name already exists"
+- POST /signup
+  - user = repo select user by username
+  - if (user) return 400 "A user with this username already exists"
   - repo insert user
   - return 200
-- POST /sign-in
+- POST /login
   - user = repo select user by username and password
-  - if (!user) return 400 "Invalid name or password"
-  - return { "token": base64encode("username:password") }
+  - if (!user) return 400 "Invalid username or password"
+  - return { "token": base64encode("id:password") }
+
+- PUT /slots (auth doctor)
+  - reservedSlot = repo select slot where req.start >= start and req.start <= req.end and doctorId = userId
+  - if reservedSlot != null
+    - 400
+  - repo insert slot
+  - 201
+- DELETE /slots/{id} (auth doctor)
+  - noDeleted = repo delete where id = req.id and doctorId = userId
+  - if noDeleted == 0
+    - 404
+  - 200
+
+- GET /slots (auth)
+  - repo select slots where patientId = userId or doctorId = userId order by start
+
+- POST /slots/{id}/reserve (auth patient)
+  - updated = repo update slots where id = req.id and patientId = null set patientId = userId
+  - if updated = 0
+    - 404
+  - 200
+- POST /slots/{id}/cancel (auth patient)
+  - updated = repo update slots where id = req.id and patientId = userId set patientId = null
+  - if updated = 0
+    - 404
+  - 200
+
+- GET /doctors (auth patient)
+  - doctors = select id, username from doctors
+- GET /doctors/{id}/slots (auth patient)
+  - slots = select slots where doctorId = req.id and patientId = null
+
+- TODO
+  - migrate
+  - update login to encode using the user id instead

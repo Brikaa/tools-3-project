@@ -6,14 +6,19 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/Brikaa/tools-3-project/src/backend/model"
 	"github.com/Brikaa/tools-3-project/src/backend/repo"
-	"github.com/gin-gonic/gin"
+	g "github.com/gin-gonic/gin"
 )
 
 type Controller struct {
 	db *sql.DB
+}
+
+func CreateController(db *sql.DB) Controller {
+	return Controller{db}
 }
 
 type SignUpRequest struct {
@@ -27,67 +32,116 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-func errorResponse(message string) gin.H {
-	return gin.H{"message": message}
+type UserContext struct {
+	Id   string
+	Role string
+}
+
+func createUserContext(id string, role string) *UserContext {
+	return &UserContext{Id: id, Role: role}
+}
+
+func errorResponse(message string) *g.H {
+	return &g.H{"message": message}
 }
 
 var allowedRoles = map[string]bool{"doctor": true, "patient": true}
 var isAlNum = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
-func CreateController(db *sql.DB) Controller {
-	return Controller{db}
+func (controller Controller) auth(role string) func(*g.Context) {
+	return func(c *g.Context) {
+		authHeader := c.GetHeader("Authorization")
+		authData := strings.Split(authHeader, " ")
+		if len(authData) != 2 {
+			c.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization header"))
+			return
+		}
+
+		scheme := authData[0]
+		token := authData[1]
+		if !strings.EqualFold(scheme, "Basic") {
+			c.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid authorization scheme"))
+			return
+		}
+
+		userpass, err := base64.StdEncoding.DecodeString(token)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		userpassData := strings.Split(string(userpass), ":")
+		username := userpassData[0]
+		password := userpassData[1]
+
+		user, dbErr := repo.SelectUserByUsernameAndPassword(controller.db, username, password)
+		if dbErr != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		if user == nil {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+
+		if role != "*" && user.Role != role {
+			c.Status(http.StatusForbidden)
+			return
+		}
+
+		c.Next()
+	}
 }
 
-func (controller Controller) Signup(c *gin.Context) {
+func (controller Controller) Signup(ctx *g.Context) {
 	var req SignUpRequest
-	if err := c.BindJSON(&req); err != nil {
+	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
 	if _, ok := allowedRoles[req.Role]; !ok {
-		c.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid role"))
+		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid role"))
 		return
 	}
 	if !isAlNum(req.Username) {
-		c.IndentedJSON(http.StatusBadRequest, errorResponse("Username can only contain alphabetic or numeric characters"))
+		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Username can only contain alphabetic or numeric characters"))
 		return
 	}
 	if len(req.Username) == 0 {
-		c.IndentedJSON(http.StatusBadRequest, errorResponse("Username must be non-empty"))
+		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Username must be non-empty"))
 		return
 	}
 	user, err := repo.SelectUserByUsername(controller.db, req.Username)
 	if err != nil {
 		log.Print(err)
-		c.Status(http.StatusInternalServerError)
+		ctx.Status(http.StatusInternalServerError)
 		return
 	}
 	if user != nil {
-		c.IndentedJSON(http.StatusBadRequest, errorResponse("A user with this username already exists"))
+		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("A user with this username already exists"))
 	}
-	newUser := model.User{Username: req.Username, Password: req.Password, Role: req.Role}
+	newUser := model.CreateUser(req.Username, req.Password, req.Role)
 	if err := repo.InsertUser(controller.db, newUser); err != nil {
 		log.Print(err)
-		c.Status(http.StatusInternalServerError)
+		ctx.Status(http.StatusInternalServerError)
 	}
-	c.Status(http.StatusOK)
+	ctx.Status(http.StatusOK)
 }
 
-func (controller Controller) Login(c *gin.Context) {
+func (controller Controller) Login(ctx *g.Context) {
 	var req LoginRequest
-	if err := c.BindJSON(&req); err != nil {
+	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
 	user, err := repo.SelectUserByUsernameAndPassword(controller.db, req.Username, req.Password)
 	if err != nil {
 		log.Print(err)
-		c.Status(http.StatusInternalServerError)
+		ctx.Status(http.StatusInternalServerError)
 		return
 	}
 	if user == nil {
-		c.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid username or password"))
+		ctx.IndentedJSON(http.StatusBadRequest, errorResponse("Invalid username or password"))
 		return
 	}
-	c.IndentedJSON(http.StatusOK,
-		gin.H{"token": base64.StdEncoding.EncodeToString([]byte(req.Username + ":" + req.Password))})
+	ctx.IndentedJSON(http.StatusOK,
+		g.H{"token": base64.StdEncoding.EncodeToString([]byte(user.ID + ":" + user.Password))})
 	return
 }

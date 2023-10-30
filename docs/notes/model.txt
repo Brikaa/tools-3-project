@@ -17,7 +17,7 @@
   - FK_SLOT_DOCTOR, User must have role doctor
   - FK_SLOT_PATIENT, User must have role patient
   - patientId can only be swapped with NULL
-  - On inserting new slot, can't have a slot with target.start >= start && target.end <= end for the same doctor
+  - On inserting new slot, can't have a slot with req.start >= start && req.start <= req.end
   - On cancelling an appointment, can't have start <= now
 
 - Flow
