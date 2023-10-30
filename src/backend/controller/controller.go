@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -113,7 +114,10 @@ func (controller Controller) Signup(ctx *g.Context) {
 		return
 	}
 	if !isAlNum(req.Username) {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Username can only contain alphabetic or numeric characters"))
+		ctx.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			errorResponse("Username can only contain alphabetic or numeric characters"),
+		)
 		return
 	}
 	if len(req.Username) == 0 {
@@ -159,7 +163,7 @@ func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
-	overlap, err := repo.GetOverlappingSlot(controller.db, userCtx.Id, req.Start, req.End)
+	overlap, err := repo.GetOverlappingSlotId(controller.db, userCtx.Id, req.Start, req.End)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
@@ -169,7 +173,10 @@ func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
 		return
 	}
 	if overlap != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse(overlap.ID+" slot overlaps with this configuration"))
+		ctx.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			errorResponse(fmt.Sprintf("Slot with id %v overlaps with this configuration", *overlap)),
+		)
 		return
 	}
 	if err := repo.InsertSlot(controller.db, req.Start, req.End, userCtx.Id); err != nil {
@@ -190,4 +197,13 @@ func (controller Controller) DeleteSlot(userCtx *UserContext, ctx *g.Context) {
 		return
 	}
 	ctx.Status(200)
+}
+
+func (controller Controller) GetSlots(userCtx *UserContext, ctx *g.Context) {
+	slots, err := repo.GetSlotsByUserId(controller.db, userCtx.Id)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, g.H{"slots": slots})
 }

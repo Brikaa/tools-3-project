@@ -8,14 +8,14 @@ import (
 	"github.com/Brikaa/tools-3-project/src/backend/model"
 )
 
-func selectOne[T any](db *sql.DB, query string, arguments []any, entity *T, rows []any) (*T, error) {
+func selectOne(db *sql.DB, query string, arguments []any, rows []any) error {
 	err := db.QueryRow(query, arguments...).Scan(rows...)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil
 	} else if err != nil {
-		return nil, fmt.Errorf("%v, %v, %v: %v", query, rows, arguments, err)
+		return fmt.Errorf("%v, %v, %v: %v", query, rows, arguments, err)
 	}
-	return entity, nil
+	return nil
 }
 
 func insert(db *sql.DB, query string, arguments []any) error {
@@ -31,9 +31,9 @@ func insert(db *sql.DB, query string, arguments []any) error {
 
 func selectOneUser(db *sql.DB, condition string, arguments []any) (*model.User, error) {
 	var user model.User
-	return selectOne(db,
+	return &user, selectOne(db,
 		"SELECT id, username, password, role FROM User WHERE "+condition,
-		arguments, &user, []any{&user.ID, &user.Username, &user.Password, &user.Role})
+		arguments, []any{&user.ID, &user.Username, &user.Password, &user.Role})
 }
 
 func SelectUserByUsername(db *sql.DB, username string) (*model.User, error) {
@@ -52,14 +52,13 @@ func InsertUser(db *sql.DB, username, password, role string) error {
 	)
 }
 
-func GetOverlappingSlot(db *sql.DB, doctorId string, start time.Time, end time.Time) (*model.Slot, error) {
-	var slot model.Slot
-	return selectOne(
+func GetOverlappingSlotId(db *sql.DB, doctorId string, start time.Time, end time.Time) (*int64, error) {
+	var slotId int64
+	return &slotId, selectOne(
 		db,
 		"SELECT id FROM Slot WHERE doctorId = ? AND ? >= start AND ? <= end",
 		[]any{doctorId, start, end},
-		&slot,
-		[]any{&slot.ID},
+		[]any{&slotId},
 	)
 }
 
@@ -81,4 +80,36 @@ func DeleteSlotByIdAndDoctorId(db *sql.DB, slotId string, doctorId string) (bool
 		return false, fmt.Errorf("%v", err)
 	}
 	return rowsAffected >= 1, nil
+}
+
+func GetSlotsByUserId(db *sql.DB, userId string) ([]*model.SlotXDoctorXPatient, error) {
+	var slots []*model.SlotXDoctorXPatient
+
+	rows, err := db.Query(
+		`SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId, Doctor.name, Slot.patientId, Patient.name
+FROM Slot WHERE patientId = ? OR doctorId = ?
+LEFT JOIN User As Doctor on Slot.doctorId = Doctor.id
+LEFT Join User As Patient on Slot.patientId = Patient.id
+ORDER BY Slot.start`,
+		userId,
+		userId,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("%q: %v", userId, err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var slot model.SlotXDoctorXPatient
+		if err := rows.Scan(
+			&slot.ID, &slot.Start, &slot.End, &slot.DoctorId, &slot.DoctorName, &slot.PatientId, &slot.PatientName,
+		); err != nil {
+			return nil, fmt.Errorf("%q: %v", userId, err)
+		}
+		slots = append(slots, &slot)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%q: %v", userId, err)
+	}
+	return slots, nil
 }
