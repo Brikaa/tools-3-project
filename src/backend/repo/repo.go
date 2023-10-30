@@ -8,12 +8,12 @@ import (
 	"github.com/Brikaa/tools-3-project/src/backend/model"
 )
 
-func selectOne(db *sql.DB, query string, arguments []any, rows []any) error {
-	err := db.QueryRow(query, arguments...).Scan(rows...)
+func selectOne(db *sql.DB, query string, arguments []any, fields []any) error {
+	err := db.QueryRow(query, arguments...).Scan(fields...)
 	if err == sql.ErrNoRows {
 		return nil
 	} else if err != nil {
-		return fmt.Errorf("%v, %v, %v: %v", query, rows, arguments, err)
+		return fmt.Errorf("%v, %v, %v: %v", query, fields, arguments, err)
 	}
 	return nil
 }
@@ -69,17 +69,17 @@ func selectAll[T any](
 }
 
 func selectOneUser(db *sql.DB, condition string, arguments []any) (*model.User, error) {
-	var user model.User
-	return &user, selectOne(db,
+	var user *model.User
+	return user, selectOne(db,
 		"SELECT id, username, password, role FROM User WHERE "+condition,
 		arguments, []any{&user.ID, &user.Username, &user.Password, &user.Role})
 }
 
-func SelectUserByUsername(db *sql.DB, username string) (*model.User, error) {
+func GetUserByUsername(db *sql.DB, username string) (*model.User, error) {
 	return selectOneUser(db, "username = ?", []any{username})
 }
 
-func SelectUserByUsernameAndPassword(db *sql.DB, username string, password string) (*model.User, error) {
+func GetUserByUsernameAndPassword(db *sql.DB, username string, password string) (*model.User, error) {
 	return selectOneUser(db, "username = ? AND password = ?", []any{username, password})
 }
 
@@ -91,13 +91,13 @@ func InsertUser(db *sql.DB, username, password, role string) error {
 	)
 }
 
-func GetOverlappingSlotId(db *sql.DB, doctorId string, start time.Time, end time.Time) (*int64, error) {
-	var slotId int64
-	return &slotId, selectOne(
+func GetOverlappingSlotId(db *sql.DB, doctorId string, start time.Time, end time.Time) (*string, error) {
+	var slotId *string
+	return slotId, selectOne(
 		db,
 		"SELECT id FROM Slot WHERE doctorId = ? AND ? >= start AND ? <= end",
 		[]any{doctorId, start, end},
-		[]any{&slotId},
+		[]any{slotId},
 	)
 }
 
@@ -165,5 +165,33 @@ LEFT JOIN USER AS Doctor ON Slot.doctorId = Doctor.id`,
 				&appointment.DoctorUsername,
 			)
 		},
+	)
+}
+
+func GetAppointmentIdBySlotId(db *sql.DB, slotId string) (*string, error) {
+	var appointmentId *string
+	return appointmentId, selectOne(
+		db,
+		"SELECT Appointment.id FROM Appointment WHERE Appointment.slotId = ?",
+		[]any{slotId},
+		[]any{appointmentId},
+	)
+}
+
+func GetSlotIdBySlotId(db *sql.DB, slotId string) (*string, error) {
+	var appointmentId *string
+	return appointmentId, selectOne(
+		db,
+		"SELECT Appointment.id FROM Appointment WHERE Appointment.slotId = ?",
+		[]any{slotId},
+		[]any{appointmentId},
+	)
+}
+
+func InsertAppointment(db *sql.DB, slotId string, patientId string) error {
+	return insert(
+		db,
+		"INSERT INTO Appointment (slotId, patientId) VALUES (?, ?)",
+		[]any{slotId, patientId},
 	)
 }

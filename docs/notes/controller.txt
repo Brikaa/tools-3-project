@@ -47,10 +47,13 @@
 - GET /appointments (auth patient)
   - repo select appointments where patientId = userId order by start
 - PUT /appointments (auth patient)
-  - reserved = repo select appointment where slot.id = req.slotId
-    - if reserved != null
-      - 400
-  - updated = repo insert into appointment
+  - reserved = repo select appointment where slotId = req.slotId
+  - if reserved != null
+    - 400
+  - slot = repo select slot where slotId = req.slotId
+  - if slot == null
+    - 400
+  - repo insert into appointment
   - 200
 - DELETE /appointments/{id} (auth patient)
   - updated = repo delete from appointments where id = req.id and patientId = userId

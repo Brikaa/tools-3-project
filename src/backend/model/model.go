@@ -17,12 +17,12 @@ type Slot struct {
 }
 
 type Appointment struct {
-	ID string
+	ID     string
+	SlotID string
 }
 
 type AppointmentXSlot struct {
 	Appointment
-	SlotID    string
 	SlotStart time.Time
 	SlotEnd   time.Time
 }

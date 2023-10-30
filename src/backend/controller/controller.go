@@ -33,18 +33,22 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-type InsertSlotRequest struct {
+type CreateSlotRequest struct {
 	Start time.Time `json:"start" time_format:"RFC3339"`
 	End   time.Time `json:"end" time_format:"RFC3339"`
 }
 
+type CreateAppointmentRequest struct {
+	SlotID string
+}
+
 type UserContext struct {
-	Id   string
+	ID   string
 	Role string
 }
 
 func createUserContext(id string, role string) *UserContext {
-	return &UserContext{Id: id, Role: role}
+	return &UserContext{ID: id, Role: role}
 }
 
 func errorResponse(message string) *g.H {
@@ -84,7 +88,7 @@ func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)
 		username := userpassData[0]
 		password := userpassData[1]
 
-		user, dbErr := repo.SelectUserByUsernameAndPassword(controller.db, username, password)
+		user, dbErr := repo.GetUserByUsernameAndPassword(controller.db, username, password)
 		if dbErr != nil {
 			handleInternalServerError(ctx, &dbErr)
 			return
@@ -124,7 +128,7 @@ func (controller Controller) Signup(ctx *g.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Username must be non-empty"))
 		return
 	}
-	user, err := repo.SelectUserByUsername(controller.db, req.Username)
+	user, err := repo.GetUserByUsername(controller.db, req.Username)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
@@ -145,7 +149,7 @@ func (controller Controller) Login(ctx *g.Context) {
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
-	user, err := repo.SelectUserByUsernameAndPassword(controller.db, req.Username, req.Password)
+	user, err := repo.GetUserByUsernameAndPassword(controller.db, req.Username, req.Password)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
@@ -158,12 +162,12 @@ func (controller Controller) Login(ctx *g.Context) {
 		g.H{"token": base64.StdEncoding.EncodeToString([]byte(user.ID + ":" + user.Password))})
 }
 
-func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
-	var req InsertSlotRequest
+func (controller Controller) CreateSlot(userCtx *UserContext, ctx *g.Context) {
+	var req CreateSlotRequest
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
-	overlap, err := repo.GetOverlappingSlotId(controller.db, userCtx.Id, req.Start, req.End)
+	overlap, err := repo.GetOverlappingSlotId(controller.db, userCtx.ID, req.Start, req.End)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
@@ -179,7 +183,7 @@ func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
 		)
 		return
 	}
-	if err := repo.InsertSlot(controller.db, req.Start, req.End, userCtx.Id); err != nil {
+	if err := repo.InsertSlot(controller.db, req.Start, req.End, userCtx.ID); err != nil {
 		handleInternalServerError(ctx, &err)
 		return
 	}
@@ -187,20 +191,20 @@ func (controller Controller) InsertSlot(userCtx *UserContext, ctx *g.Context) {
 }
 
 func (controller Controller) DeleteSlot(userCtx *UserContext, ctx *g.Context) {
-	deleted, err := repo.DeleteSlotByIdAndDoctorId(controller.db, ctx.Param("id"), userCtx.Id)
+	deleted, err := repo.DeleteSlotByIdAndDoctorId(controller.db, ctx.Param("id"), userCtx.ID)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
 	}
 	if !deleted {
-		ctx.AbortWithStatus(404)
+		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	ctx.Status(200)
+	ctx.Status(http.StatusOK)
 }
 
 func (controller Controller) GetSlots(userCtx *UserContext, ctx *g.Context) {
-	slots, err := repo.GetSlotsByDoctorId(controller.db, userCtx.Id)
+	slots, err := repo.GetSlotsByDoctorId(controller.db, userCtx.ID)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
@@ -209,7 +213,7 @@ func (controller Controller) GetSlots(userCtx *UserContext, ctx *g.Context) {
 }
 
 func (controller Controller) GetDoctorAppointments(userCtx *UserContext, ctx *g.Context) {
-	appointments, err := repo.GetAppointmentsByDoctorId(controller.db, userCtx.Id)
+	appointments, err := repo.GetAppointmentsByDoctorId(controller.db, userCtx.ID)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
@@ -218,10 +222,43 @@ func (controller Controller) GetDoctorAppointments(userCtx *UserContext, ctx *g.
 }
 
 func (controller Controller) GetAppointments(userCtx *UserContext, ctx *g.Context) {
-	appointments, err := repo.GetAppointmentsByPatientId(controller.db, userCtx.Id)
+	appointments, err := repo.GetAppointmentsByPatientId(controller.db, userCtx.ID)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
 		return
 	}
 	ctx.IndentedJSON(http.StatusOK, g.H{"appointments": appointments})
+}
+
+func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Context) {
+	var req CreateAppointmentRequest
+	if err := ctx.BindJSON(&req); err != nil {
+		return
+	}
+
+	reserved, err := repo.GetAppointmentIdBySlotId(controller.db, req.SlotID)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	if reserved != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("This slot is already reserved"))
+		return
+	}
+
+	target, targetErr := repo.GetSlotIdBySlotId(controller.db, req.SlotID)
+	if targetErr != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	if target == nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("This slot does not exist"))
+		return
+	}
+
+	if err := repo.InsertAppointment(controller.db, req.SlotID, userCtx.ID); err != nil {
+		handleInternalServerError(ctx, &err)
+	}
+
+	ctx.Status(http.StatusOK)
 }
