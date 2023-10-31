@@ -1,7 +1,48 @@
-- Create user with invalid username, non alnum, empty
-- Log in with invalid username (OK)
-- Log in with invalid password (OK)
-- Log in with valid username and password, check ID encoding
-- Invalid Authorization scheme
-- Insert slot
-- Insert slot with overlap
+- Create patient p1
+- Create patient p2
+- Create doctor d1
+- Create doctor d2
+- Log in p2 invalid password
+- Log in p2
+- Create slot in the future (forbidden)
+- Log in d1
+- Get slots ([])
+- Create slot in the past (invalid)
+- Create slots d1s1 in the future
+- Create slots d1s2 in the future
+- Create slots d1s3 in the future
+- Get slots ([d1s1, d1s2, d1s3])
+- Get appointments ([])
+- Log in d2
+- Get slots ([])
+- Create slots d2s1 in the future
+- Create slots d2s2 in the future
+- Create slots d2s3 in the future
+- Get slots ([d2s1, d2s2, d2s3])
+- Log in p1
+- Get doctors ([d1, d2])
+- Get slots for d1 ([d1s1, d1s2, d1s3])
+- Get slots for d2 ([d2s1, d2s2, d2s3])
+- Reserve slot d1s1 (p1a1d1s1)
+- Reserve slot d2s2 (p1a2d2s2)
+- Get slots for d1 ([d1s2, d1s3])
+- Get slots for d2 ([d2s1, d2s3])
+- Get appointments ([p1a1d1s1, p1a2d2s2])
+- Log in p2
+- Get slots for d1 ([d1s2, d1s3])
+- Get slots for d2 ([d2s1, d2s3])
+- Reserve slot d1s1 (invalid)
+- Reserve slot d1s3 (p2a1d1s3)
+- Reserve slot d2s3 (p2a1d2s3)
+- Get slots for d1 ([d1s2])
+- Get slots for d2 ([d2s1])
+- Get appointments ([p2a1d1s3, p2a1d2s3])
+- Delete appointment p1a1d1s1 (invalid)
+- Delete appointment ([p2a1d1s3])
+- Get slots for d1 ([d1s2, d1s3])
+- Get slots for d2 ([d2s1])
+- Get appointments ([p2a1d2s3])
+- Log in d2
+- Get appointments ([p1a2d2s2, p2a1d2s3])
+- Delete slot d2s3
+- Get appointments ([p1a2d2s2])
