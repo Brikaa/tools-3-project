@@ -210,3 +210,15 @@ func GetDoctors(db *sql.DB) ([]*model.Doctor, error) {
 		},
 	)
 }
+
+func GetAvailableSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, error) {
+	return selectAll(
+		db,
+		`SELECT Slot.id, Slot.start, Slot.end FROM Slot WHERE doctorId = ? AND Appointment.id IS NULL
+LEFT JOIN Appointment ON Appointment.slotId = Slot.id`,
+		[]any{doctorId},
+		func(rows *sql.Rows, slot *model.Slot) error {
+			return rows.Scan(&slot.ID, &slot.Start, &slot.End)
+		},
+	)
+}

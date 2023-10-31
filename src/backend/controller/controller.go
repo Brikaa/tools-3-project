@@ -39,7 +39,7 @@ type CreateSlotRequest struct {
 }
 
 type CreateAppointmentRequest struct {
-	SlotID string
+	SlotID string `json:"slotId"`
 }
 
 type UserContext struct {
@@ -283,4 +283,13 @@ func (controller Controller) GetDoctors(_ *UserContext, ctx *g.Context) {
 		return
 	}
 	ctx.IndentedJSON(http.StatusOK, g.H{"doctors": doctors})
+}
+
+func (controller Controller) GetAvailableSlotsForDoctor(_ *UserContext, ctx *g.Context) {
+	slots, err := repo.GetAvailableSlotsByDoctorId(controller.db, ctx.Param("id"))
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, g.H{"slots": slots})
 }
