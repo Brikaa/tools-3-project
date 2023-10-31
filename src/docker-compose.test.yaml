@@ -1,0 +1,17 @@
+volumes:
+  database:
+    external: false
+
+services:
+  backend_tester:
+    container_name: backend_tester
+    image: backend_tester
+    build: ./backend/tests
+    networks:
+      - src_default
+
+networks:
+  src_default:
+    name: src_default
+    external: true
+

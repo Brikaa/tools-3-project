@@ -1,6 +1,7 @@
 -include .env
 docker_compose_build = docker-compose -f docker-compose.build.yaml
 docker_compose_run = docker-compose -f docker-compose.run.yaml
+docker_compose_test = docker-compose -f docker-compose.test.yaml
 
 dev:
 	./create-env.sh
@@ -26,3 +27,7 @@ migrate:
 
 mysql:
 	$(docker_compose_run) exec -it database mysql -hdatabase -u${MYSQL_USER} -p${MYSQL_PASSWORD} -Dapp
+
+test:
+	make migrate
+	$(docker_compose_test) up --build

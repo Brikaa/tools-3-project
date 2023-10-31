@@ -2,6 +2,7 @@
 - Create patient p2
 - Create doctor d1
 - Create doctor d2
+- Create doctor d2 (invalid)
 - Log in p2 invalid password
 - Log in p2
 - Create slot in the future (forbidden)
