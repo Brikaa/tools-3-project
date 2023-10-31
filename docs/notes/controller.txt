@@ -29,7 +29,9 @@
   - return { "token": base64encode("id:password") }
 
 - PUT /slots (auth doctor)
-  - reservedSlot = repo select slot where req.start >= start and req.start <= req.end and doctorId = userId
+  - reservedSlot = repo select slot
+    where (req.start >= start and req.start <= req.end) or (req.end >= start and req.end <= req.end)
+    and doctorId = userId
   - if reservedSlot != null
     - 400
   - repo insert slot

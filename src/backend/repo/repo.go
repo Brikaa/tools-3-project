@@ -95,8 +95,8 @@ func GetOverlappingSlotId(db *sql.DB, doctorId string, start time.Time, end time
 	var slotId *string
 	return slotId, selectOne(
 		db,
-		"SELECT id FROM Slot WHERE doctorId = ? AND ? >= start AND ? <= end",
-		[]any{doctorId, start, end},
+		"SELECT id FROM Slot WHERE doctorId = ? AND ((? >= start AND ? <= end) OR (? >= start AND ? <= end))",
+		[]any{doctorId, start, start, end, end},
 		[]any{slotId},
 	)
 }
