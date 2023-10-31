@@ -26,7 +26,7 @@
 - Log in p1
 - Get doctors ([d1, d2])
 - Get slots for d1 ([d1s1, d1s2, d1s3])
-- Get slots for d2 ([d2s1, d2s2, d2s3])
+- Get slots for d2 ([d2s1, d2s2, d2s3]) [STOPPED HERE]
 - Reserve slot d1s1 (p1a1d1s1)
 - Reserve slot d2s2 (p1a2d2s2)
 - Get slots for d1 ([d1s2, d1s3])

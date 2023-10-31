@@ -3,7 +3,6 @@ import json
 import datetime
 
 BASE = "http://backend_runner:8000"
-token = ""
 headers = {"Content-Type": "application/json"}
 slots = {}
 
@@ -21,6 +20,7 @@ def action(message, function):
     print(message)
     result = function()
     print(result + "\n")
+    return result
 
 
 def signup(username, password, role):
@@ -36,7 +36,7 @@ def login(username, password):
     )
     status = res.status_code
     if status == 200:
-        token = res.json()["token"]
+        headers["Authorization"] = "Basic " + res.json()["token"]
     return res.text, status
 
 
@@ -56,6 +56,17 @@ def get_doctor_appointments():
     res = send_request("GET", "doctor-appointments", None)
     return res.text, res.status_code
 
+
+def get_doctors():
+    res = send_request("GET", "doctors", None)
+    return res.text, res.status_code
+
+
+def get_available_slots_for_doctor(id):
+    res = send_request("GET", f"doctor/{id}/slots", None)
+    return res.text, res.status_code
+
+
 if __name__ == "__main__":
     p1_username = "p1"
     p1_password = "p1123"
@@ -67,15 +78,24 @@ if __name__ == "__main__":
     d2_username = "d2"
     d2_password = "d2123"
 
-    d1s1_start = datetime.datetime.now()
+    d1s1 = datetime.datetime.now()
     d1s1_delta = datetime.timedelta(hours=1)
-    d1s1_end = d1s1_start + d1s1_delta
+    d1s1_end = d1s1 + d1s1_delta
 
-    d1s2_start = d1s1_end + datetime.timedelta(hours=2)
-    d1s2_end = d1s2_start + datetime.timedelta(hours=2)
+    d1s2 = d1s1_end + datetime.timedelta(hours=2)
+    d1s2_end = d1s2 + datetime.timedelta(hours=2)
 
-    d1s3_start = d1s2_end + datetime.timedelta(hours=2)
-    d1s3_end = d1s3_start + datetime.timedelta(hours=2)
+    d1s3 = d1s2_end + datetime.timedelta(hours=1)
+    d1s3_end = d1s3 + datetime.timedelta(hours=1)
+
+    d2s1 = datetime.datetime.now() + datetime.timedelta(minutes=30)
+    d2s1_end = d2s1 + datetime.timedelta(hours=2)
+
+    d2s2 = d2s1_end + datetime.timedelta(hours=3)
+    d2s2_end = d2s2 + datetime.timedelta(hours=3)
+
+    d2s3 = d2s2_end + datetime.timedelta(hours=4)
+    d2s3_end = d2s3 + datetime.timedelta(hours=4)
 
     action("Signup p1", lambda: signup(p1_username, p1_password, "patient"))
     action("Signup p2", lambda: signup(p2_username, p2_password, "patient"))
@@ -87,7 +107,7 @@ if __name__ == "__main__":
 
     action("Login p2 (invalid password)", lambda: login(p2_username, p2_password + "a"))
     action("Login p2", lambda: login(p2_username, p2_password))
-    action("Create valid slot (forbidden)", lambda: create_slot(d1s1_start, d1s1_end))
+    action("Create valid slot (forbidden)", lambda: create_slot(d1s1, d1s1_end))
 
     action("Login d1", lambda: login(d1_username, d1_password))
     action("Get slots ([])", get_slots)
@@ -97,18 +117,36 @@ if __name__ == "__main__":
     )
     action(
         "Create slot with end before start (invalid)",
-        lambda: create_slot(d1s1_end, d1s1_start),
+        lambda: create_slot(d1s1_end, d1s1),
     )
-    action("Create slot d1s1", lambda: create_slot(d1s1_start, d1s1_end))
+    action("Create slot d1s1", lambda: create_slot(d1s1, d1s1_end))
     action(
         "Create slot overlapping with d1s1 at target start (invalid)",
-        lambda: create_slot(d1s1_start + d1s1_delta / 2, d1s1_end + d1s1_delta / 2),
+        lambda: create_slot(d1s1 + d1s1_delta / 2, d1s1_end + d1s1_delta / 2),
     )
     action(
         "Create slot overlapping with d1s1 at target end (invalid)",
-        lambda: create_slot(d1s1_start - d1s1_delta / 2, d1s1_end - d1s1_delta / 2),
+        lambda: create_slot(d1s1 - d1s1_delta / 2, d1s1_end - d1s1_delta / 2),
     )
-    action("Create slot d1s2", lambda: create_slot(d1s2_start, d1s2_end))
-    action("Create slot d1s3", lambda: create_slot(d1s3_start, d1s3_end))
-    action("Get slots ([d1s1, d1s2, d1s3])", get_slots)
+    action("Create slot d1s2", lambda: create_slot(d1s2, d1s2_end))
+    action("Create slot d1s3", lambda: create_slot(d1s3, d1s3_end))
+    action(f"Get slots ([{d1s1}, {d1s2}, {d1s3}])", get_slots)
     action("Get appointments ([])", get_doctor_appointments)
+
+    action("Login d2", lambda: login(d2_username, d2_password))
+    action("Get slots ([])", get_slots)
+    action("Create slot d2s1", lambda: create_slot(d2s1, d2s1_end))
+    action("Create slot d2s2", lambda: create_slot(d2s2, d2s2_end))
+    action("Create slot d2s3", lambda: create_slot(d2s3, d2s3_end))
+    action(f"Get slots ([{d2s1}, {d2s2}, {d2s3}])", get_slots)
+
+    action("Login p1", lambda: login(p1_username, p1_password))
+    _, doctors_res = action("Get doctors ([d1, d2])", get_doctors)
+    doctors_list = json.loads(doctors)["doctors"]
+    doctors = {}
+    for doctor in doctors_list:
+        doctors["username"] = doctor["id"]
+    action(
+        f"Get slots for d1 ([{d1s1}, {d1s2}, {d1s3}])",
+        lambda: get_available_slots_for_doctor(doctors["d1"]),
+    )

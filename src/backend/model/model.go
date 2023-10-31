@@ -10,32 +10,32 @@ type User struct {
 }
 
 type Doctor struct {
-	ID       string
-	Username string
+	ID       string `json:"id"`
+	Username string `json:"username"`
 }
 
 type Slot struct {
-	ID       string
-	Start    time.Time
-	End      time.Time
-	DoctorID string
+	ID       string    `json:"id"`
+	Start    time.Time `json:"start"`
+	End      time.Time `json:"end"`
+	DoctorID string    `json:"doctorId"`
 }
 
 type Appointment struct {
-	ID     string
-	SlotID string
+	ID     string `json:"id"`
+	SlotID string `json:"slotId"`
 }
 
 type AppointmentXSlot struct {
 	Appointment
-	SlotStart time.Time
-	SlotEnd   time.Time
+	SlotStart time.Time `json:"start"`
+	SlotEnd   time.Time `json:"end"`
 }
 
 type AppointmentXSlotXPatient struct {
 	AppointmentXSlot
-	PatientID       string
-	PatientUsername string
+	PatientID       string `json:"patientId"`
+	PatientUsername string `json:"patientUsername"`
 }
 
 type AppointmentXSlotXDoctor struct {
