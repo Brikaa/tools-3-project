@@ -8,14 +8,14 @@ import (
 	"github.com/Brikaa/tools-3-project/src/backend/model"
 )
 
-func selectOne(db *sql.DB, query string, arguments []any, fields []any) error {
-	err := db.QueryRow(query, arguments...).Scan(fields...)
-	if err == sql.ErrNoRows {
-		return nil
+func selectOne[T any](db *sql.DB, query string, arguments []any, flatten func(*T) []any) (*T, error) {
+	var entity T
+	if err := db.QueryRow(query, arguments...).Scan(flatten(&entity)...); err == sql.ErrNoRows {
+		return nil, nil
 	} else if err != nil {
-		return fmt.Errorf("%v, %v, %v: %v", query, fields, arguments, err)
+		return nil, fmt.Errorf("%v, %v: %v", query, arguments, err)
 	}
-	return nil
+	return &entity, nil
 }
 
 func insert(db *sql.DB, query string, arguments []any) error {
@@ -69,10 +69,9 @@ func selectAll[T any](
 }
 
 func selectOneUser(db *sql.DB, condition string, arguments []any) (*model.User, error) {
-	var user *model.User
-	return user, selectOne(db,
+	return selectOne(db,
 		"SELECT id, username, password, role FROM User WHERE "+condition,
-		arguments, []any{&user.ID, &user.Username, &user.Password, &user.Role})
+		arguments, func(user *model.User) []any { return []any{&user.ID, &user.Username, &user.Password, &user.Role} })
 }
 
 func GetUserByUsername(db *sql.DB, username string) (*model.User, error) {
@@ -92,12 +91,11 @@ func InsertUser(db *sql.DB, username, password, role string) error {
 }
 
 func GetOverlappingSlotId(db *sql.DB, doctorId string, start time.Time, end time.Time) (*string, error) {
-	var slotId *string
-	return slotId, selectOne(
+	return selectOne(
 		db,
 		"SELECT id FROM Slot WHERE doctorId = ? AND ((? >= start AND ? <= end) OR (? >= start AND ? <= end))",
 		[]any{doctorId, start, start, end, end},
-		[]any{slotId},
+		func(slotId *string) []any { return []any{&slotId} },
 	)
 }
 
@@ -169,22 +167,20 @@ LEFT JOIN USER AS Doctor ON Slot.doctorId = Doctor.id`,
 }
 
 func GetAppointmentIdBySlotId(db *sql.DB, slotId string) (*string, error) {
-	var appointmentId *string
-	return appointmentId, selectOne(
+	return selectOne(
 		db,
 		"SELECT Appointment.id FROM Appointment WHERE Appointment.slotId = ?",
 		[]any{slotId},
-		[]any{appointmentId},
+		func(appointmentId *string) []any { return []any{&appointmentId} },
 	)
 }
 
 func GetSlotIdBySlotId(db *sql.DB, slotId string) (*string, error) {
-	var appointmentId *string
-	return appointmentId, selectOne(
+	return selectOne(
 		db,
-		"SELECT Appointment.id FROM Appointment WHERE Appointment.slotId = ?",
+		"SELECT Slot.id FROM Slot WHERE slotId = ?",
 		[]any{slotId},
-		[]any{appointmentId},
+		func(slotId *string) []any { return []any{&slotId} },
 	)
 }
 

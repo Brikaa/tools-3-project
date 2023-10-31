@@ -75,3 +75,4 @@
 - Nice to have
   - Transactions
   - Abstract the time_format
+  - Abstraction for CRUD methods to avoid boilerplate
