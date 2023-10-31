@@ -176,6 +176,10 @@ func (controller Controller) CreateSlot(userCtx *UserContext, ctx *g.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("The slot must start before it ends"))
 		return
 	}
+	if req.Start.Before(time.Now()) {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("The slot must start in the future"))
+		return
+	}
 	if overlap != nil {
 		ctx.AbortWithStatusJSON(
 			http.StatusBadRequest,
