@@ -195,3 +195,7 @@ func InsertAppointment(db *sql.DB, slotId string, patientId string) error {
 		[]any{slotId, patientId},
 	)
 }
+
+func DeleteAppointmentByIdAndPatientId(db *sql.DB, appointmentId string, patientId string) (bool, error) {
+	return update(db, "DELETE FROM Appointment WHERE id = ? AND patientId = ?", []any{appointmentId, patientId})
+}

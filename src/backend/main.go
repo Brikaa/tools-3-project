@@ -46,7 +46,8 @@ func main() {
 	router.GET("/slots", controller.Auth("doctor", controller.GetSlots))
 	router.GET("/doctor-appointments", controller.Auth("doctor", controller.GetDoctorAppointments))
 
-	router.GET("/appointments", controller.Auth("patient", controller.GetDoctorAppointments))
+	router.GET("/appointments", controller.Auth("patient", controller.GetAppointments))
+	router.PUT("/appointments", controller.Auth("patient", controller.CreateAppointment))
 
 	router.Run(":8000")
 }

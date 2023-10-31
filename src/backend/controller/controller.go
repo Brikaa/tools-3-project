@@ -262,3 +262,16 @@ func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Cont
 
 	ctx.Status(http.StatusOK)
 }
+
+func (controller Controller) DeleteAppointment(userCtx *UserContext, ctx *g.Context) {
+	deleted, err := repo.DeleteAppointmentByIdAndPatientId(controller.db, ctx.Param("id"), userCtx.ID)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	if !deleted {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	ctx.Status(http.StatusOK)
+}
