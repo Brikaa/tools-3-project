@@ -275,3 +275,12 @@ func (controller Controller) DeleteAppointment(userCtx *UserContext, ctx *g.Cont
 	}
 	ctx.Status(http.StatusOK)
 }
+
+func (controller Controller) GetDoctors(_ *UserContext, ctx *g.Context) {
+	doctors, err := repo.GetDoctors(controller.db)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, g.H{"doctors": doctors})
+}

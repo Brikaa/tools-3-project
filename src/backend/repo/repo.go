@@ -199,3 +199,14 @@ func InsertAppointment(db *sql.DB, slotId string, patientId string) error {
 func DeleteAppointmentByIdAndPatientId(db *sql.DB, appointmentId string, patientId string) (bool, error) {
 	return update(db, "DELETE FROM Appointment WHERE id = ? AND patientId = ?", []any{appointmentId, patientId})
 }
+
+func GetDoctors(db *sql.DB) ([]*model.Doctor, error) {
+	return selectAll(
+		db,
+		`SELECT User.id, User.username FROM User WHERE User.role = "doctor"`,
+		[]any{},
+		func(rows *sql.Rows, doctor *model.Doctor) error {
+			return rows.Scan(&doctor.ID, &doctor.Username)
+		},
+	)
+}

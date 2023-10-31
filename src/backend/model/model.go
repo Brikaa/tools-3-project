@@ -9,6 +9,11 @@ type User struct {
 	Role     string
 }
 
+type Doctor struct {
+	ID       string
+	Username string
+}
+
 type Slot struct {
 	ID       string
 	Start    time.Time
