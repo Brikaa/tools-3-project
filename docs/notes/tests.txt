@@ -9,7 +9,10 @@
 - Log in d1
 - Get slots ([])
 - Create slot in the past (invalid)
+- Create slot with end before start (invalid)
 - Create slots d1s1 in the future
+- Create slot overlapping with d1s1 at target start (invalid)
+- Create slot overlapping with d1s1 at target end (invalid)
 - Create slots d1s2 in the future
 - Create slots d1s3 in the future
 - Get slots ([d1s1, d1s2, d1s3])

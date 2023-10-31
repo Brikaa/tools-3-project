@@ -30,4 +30,4 @@ mysql:
 
 test:
 	make migrate
-	$(docker_compose_test) up --build
+	$(docker_compose_test) up --build && $(docker_compose_test) rm -fsv
