@@ -95,7 +95,7 @@ func GetOverlappingSlotId(db *sql.DB, doctorId string, start time.Time, end time
 		db,
 		"SELECT id FROM Slot WHERE doctorId = ? AND ((? >= start AND ? <= end) OR (? >= start AND ? <= end))",
 		[]any{doctorId, start, start, end, end},
-		func(slotId *string) []any { return []any{&slotId} },
+		func(slotId *string) []any { return []any{slotId} },
 	)
 }
 
@@ -171,7 +171,7 @@ func GetAppointmentIdBySlotId(db *sql.DB, slotId string) (*string, error) {
 		db,
 		"SELECT Appointment.id FROM Appointment WHERE Appointment.slotId = ?",
 		[]any{slotId},
-		func(appointmentId *string) []any { return []any{&appointmentId} },
+		func(appointmentId *string) []any { return []any{appointmentId} },
 	)
 }
 
@@ -180,7 +180,7 @@ func GetSlotIdBySlotId(db *sql.DB, slotId string) (*string, error) {
 		db,
 		"SELECT Slot.id FROM Slot WHERE slotId = ?",
 		[]any{slotId},
-		func(slotId *string) []any { return []any{&slotId} },
+		func(slotId *string) []any { return []any{slotId} },
 	)
 }
 

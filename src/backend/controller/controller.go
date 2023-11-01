@@ -185,7 +185,7 @@ func (controller Controller) withPutSlotBusinessRules(
 	if overlap != nil {
 		ctx.AbortWithStatusJSON(
 			http.StatusBadRequest,
-			errorResponse(fmt.Sprintf("Slot with id %v overlaps with this configuration", *overlap)),
+			errorResponse(fmt.Sprintf("Slot with id %s overlaps with this configuration", *overlap)),
 		)
 		return
 	}

@@ -89,13 +89,14 @@ def create_appointment(slot_id):
 
 def get_slot_id_by_start_date(slots, start):
     return list(
-        filter(lambda slot: datetime.datetime.fromisoformat(slot["start"]) == start),
-        slots,
+        filter(
+            lambda slot: datetime.datetime.fromisoformat(slot["start"]) == start, slots
+        )
     )[0]["id"]
 
 
 def get_doctor_id_by_username(doctors, username):
-    return list(filter(lambda doctor: doctor["username"] == username))[0]["id"]
+    return list(filter(lambda doctor: doctor["username"] == username, doctors))[0]["id"]
 
 
 def get_appointments():
@@ -104,7 +105,9 @@ def get_appointments():
 
 
 def get_appointment_id_by_slot_id(appointments, slot_id):
-    return list(filter(lambda appointment: appointment["slotId"] == slot_id))[0]["id"]
+    return list(
+        filter(lambda appointment: appointment["slotId"] == slot_id, appointments)
+    )[0]["id"]
 
 
 def delete_appointment(id):
@@ -133,7 +136,9 @@ if __name__ == "__main__":
     d2_username = "d2"
     d2_password = "d2123"
 
-    d1s1_start = datetime.datetime.now()
+    d1s1_start = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(
+        minutes=15
+    )
     d1s1_delta = datetime.timedelta(hours=1)
     d1s1_end = d1s1_start + d1s1_delta
 
@@ -168,9 +173,7 @@ if __name__ == "__main__":
     action("Get slots ([])", get_slots)
     action(
         "Create slot in the past (invalid)",
-        lambda: create_slot(
-            datetime.datetime.now() - datetime.timedelta(hours=1), d1s1_end
-        ),
+        lambda: create_slot(d1s1_start - datetime.timedelta(days=3), d1s1_end),
     )
     action(
         "Create slot with end before start (invalid)",
