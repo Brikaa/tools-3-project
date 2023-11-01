@@ -1,8 +1,9 @@
 import requests
 import json
 import datetime
+import os
 
-BASE = "http://backend_runner:8000"
+BASE = f"http://backend_runner:{os.environ['BACKEND_PORT']}"
 headers = {"Content-Type": "application/json"}
 
 
@@ -18,7 +19,7 @@ def send_request(method, endpoint, payload):
 def action(message, function):
     print(message)
     result = function()
-    print(result + "\n")
+    print(result, "\n")
     return result
 
 
@@ -30,9 +31,7 @@ def signup(username, password, role):
 
 
 def login(username, password):
-    res = send_request(
-        "POST", "login", {"username": username, "password": password, "role": role}
-    )
+    res = send_request("POST", "login", {"username": username, "password": password})
     status = res.status_code
     if status == 200:
         headers["Authorization"] = "Basic " + res.json()["token"]
@@ -41,14 +40,24 @@ def login(username, password):
 
 def create_slot(start, end):
     res = send_request(
-        "PUT", "slots", {"start": start.isoformat(), "end": end.isoformat()}
+        "PUT",
+        "slots",
+        {
+            "start": datetime.datetime.isoformat(start),
+            "end": datetime.datetime.isoformat(end),
+        },
     )
     return res.text, res.status_code
 
 
 def update_slot(id, start, end):
     res = send_request(
-        "PUT", f"slots/{id}", {"start": start.isoformat(), "end": end.isoformat()}
+        "PUT",
+        f"slots/{id}",
+        {
+            "start": datetime.datetime.isoformat(start),
+            "end": datetime.datetime.isoformat(end),
+        },
     )
     return res.text, res.status_code
 
@@ -159,7 +168,9 @@ if __name__ == "__main__":
     action("Get slots ([])", get_slots)
     action(
         "Create slot in the past (invalid)",
-        lambda: create_slot("2011-10-31T18:30:16.320Z", "2011-10-31T19:30:16.320Z"),
+        lambda: create_slot(
+            datetime.datetime.now() - datetime.timedelta(hours=1), d1s1_end
+        ),
     )
     action(
         "Create slot with end before start (invalid)",

@@ -78,6 +78,10 @@ func GetUserByUsernameAndPassword(db *sql.DB, username string, password string) 
 	return selectOneUser(db, "username = ? AND password = ?", []any{username, password})
 }
 
+func GetUserByIdAndPassword(db *sql.DB, id string, password string) (*model.User, error) {
+	return selectOneUser(db, "id = ? AND password = ?", []any{id, password})
+}
+
 func InsertUser(db *sql.DB, username, password, role string) error {
 	return insert(
 		db,

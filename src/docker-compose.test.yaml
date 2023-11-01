@@ -9,6 +9,8 @@ services:
     build: ./backend/tests
     networks:
       - src_default
+    environment:
+      - BACKEND_PORT=${BACKEND_PORT}
 
 networks:
   src_default:

@@ -88,7 +88,7 @@ func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)
 		username := userpassData[0]
 		password := userpassData[1]
 
-		user, dbErr := repo.GetUserByUsernameAndPassword(controller.db, username, password)
+		user, dbErr := repo.GetUserByIdAndPassword(controller.db, username, password)
 		if dbErr != nil {
 			handleInternalServerError(ctx, &dbErr)
 			return
