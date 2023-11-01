@@ -19,11 +19,7 @@ func selectOne[T any](db *sql.DB, query string, arguments []any, flatten func(*T
 }
 
 func insert(db *sql.DB, query string, arguments []any) error {
-	result, err := db.Exec(query, arguments...)
-	if err != nil {
-		return fmt.Errorf("%v", err)
-	}
-	if _, err := result.LastInsertId(); err != nil {
+	if _, err := db.Exec(query, arguments...); err != nil {
 		return fmt.Errorf("%v", err)
 	}
 	return nil
@@ -114,10 +110,10 @@ func DeleteSlotByIdAndDoctorId(db *sql.DB, slotId string, doctorId string) (bool
 func GetSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, error) {
 	return selectAll(
 		db,
-		"SELECT Slot.id, Slot.start, Slot.end FROM Slot WHERE doctorId = ?",
+		"SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId FROM Slot WHERE doctorId = ?",
 		[]any{doctorId},
 		func(rows *sql.Rows, slot *model.Slot) error {
-			return rows.Scan(&slot.ID, &slot.Start, &slot.End)
+			return rows.Scan(&slot.ID, &slot.Start, &slot.End, &slot.DoctorID)
 		},
 	)
 }
@@ -210,7 +206,7 @@ func GetDoctors(db *sql.DB) ([]*model.Doctor, error) {
 func GetAvailableSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, error) {
 	return selectAll(
 		db,
-		`SELECT Slot.id, Slot.start, Slot.end FROM Slot WHERE doctorId = ? AND Appointment.id IS NULL
+		`SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId FROM Slot WHERE doctorId = ? AND Appointment.id IS NULL
 LEFT JOIN Appointment ON Appointment.slotId = Slot.id`,
 		[]any{doctorId},
 		func(rows *sql.Rows, slot *model.Slot) error {

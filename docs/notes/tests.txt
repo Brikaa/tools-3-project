@@ -26,27 +26,32 @@
 - Log in p1
 - Get doctors ([d1, d2])
 - Get slots for d1 ([d1s1, d1s2, d1s3])
-- Get slots for d2 ([d2s1, d2s2, d2s3]) [STOPPED HERE]
-- Reserve slot d1s1 (p1a1d1s1)
-- Reserve slot d2s2 (p1a2d2s2)
+- Get slots for d2 ([d2s1, d2s2, d2s3])
+- Reserve slot d1s1 (p1d1s1)
+- Reserve slot d2s2 (p1d2s2)
 - Get slots for d1 ([d1s2, d1s3])
 - Get slots for d2 ([d2s1, d2s3])
-- Get appointments ([p1a1d1s1, p1a2d2s2])
+- Get appointments ([p1d1s1, p1d2s2])
 - Log in p2
 - Get slots for d1 ([d1s2, d1s3])
 - Get slots for d2 ([d2s1, d2s3])
 - Reserve slot d1s1 (invalid)
-- Reserve slot d1s3 (p2a1d1s3)
-- Reserve slot d2s3 (p2a1d2s3)
+- Reserve slot d1s3 (p2d1s3)
+- Reserve slot d2s3 (p2d2s3)
 - Get slots for d1 ([d1s2])
 - Get slots for d2 ([d2s1])
-- Get appointments ([p2a1d1s3, p2a1d2s3])
-- Delete appointment p1a1d1s1 (invalid)
-- Delete appointment ([p2a1d1s3])
+- Get appointments ([p2d1s3, p2d2s3])
+- Delete appointment p1d1s1 (invalid)
+- Delete appointment p2d1s3
 - Get slots for d1 ([d1s2, d1s3])
 - Get slots for d2 ([d2s1])
-- Get appointments ([p2a1d2s3])
+- Get appointments ([p2d2s3])
+- Update appointment p2d2s3 -> p2d2s1
+- Get slots for d2 ([d2s3])
+- Update appointment p2d2s1 -> p2d1s3
+- Get slots for d2 ([d2s1, d2s3])
+- Get slots for d1 ([d1s2)
 - Log in d2
-- Get appointments ([p1a2d2s2, p2a1d2s3])
-- Delete slot d2s3
-- Get appointments ([p1a2d2s2])
+- Get appointments ([p1d2s2])
+- Delete slot d2s2
+- Get appointments ([])

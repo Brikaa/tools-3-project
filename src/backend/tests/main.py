@@ -4,8 +4,9 @@ import datetime
 
 BASE = "http://backend_runner:8000"
 headers = {"Content-Type": "application/json"}
-slots = {}
-
+current_doctor_slots = []
+current_patient_appointments = []
+current_patient_doctor_to_slots = {}
 
 def create_url(endpoint):
     return BASE + "/" + endpoint
@@ -59,11 +60,21 @@ def get_doctor_appointments():
 
 def get_doctors():
     res = send_request("GET", "doctors", None)
-    return res.text, res.status_code
+    status = res.status_code
+    if status < 400:
+        doctors_list = res.json()["doctors"]
+        for doctor in doctors_list:
+            doctor_username_to_id[doctor["username"]] = doctor["id"]
+    return res.text, status
 
 
 def get_available_slots_for_doctor(id):
     res = send_request("GET", f"doctor/{id}/slots", None)
+    return res.text, res.status_code
+
+
+def create_appointment(slot_id):
+    res = send_request("PUT", f"appointments", {"slotId": slot_id})
     return res.text, res.status_code
 
 
@@ -141,12 +152,13 @@ if __name__ == "__main__":
     action(f"Get slots ([{d2s1}, {d2s2}, {d2s3}])", get_slots)
 
     action("Login p1", lambda: login(p1_username, p1_password))
-    _, doctors_res = action("Get doctors ([d1, d2])", get_doctors)
-    doctors_list = json.loads(doctors)["doctors"]
-    doctors = {}
-    for doctor in doctors_list:
-        doctors["username"] = doctor["id"]
+    action("Get doctors ([d1, d2])", get_doctors)
     action(
         f"Get slots for d1 ([{d1s1}, {d1s2}, {d1s3}])",
-        lambda: get_available_slots_for_doctor(doctors["d1"]),
+        lambda: get_available_slots_for_doctor(doctor_username_to_id["d1"]),
     )
+    action(
+        f"Get slots for d2 ([{d2s1}, {d2s2}, {d2s3}])",
+        lambda: get_available_slots_for_doctor(doctor_username_to_id["d1"]),
+    )
+    action(f"Reserve slot {d1s1} (p1d1s1)", lambda: create_appointment())
