@@ -80,9 +80,6 @@
 - GET /doctors/{id}/slots (auth patient)
   - slots = select Slot where Slot.doctorId = req.id and Appointment.id = null left join Appointment
 
-- TODO
-  - Update slot, update appointment
-
 - Nice to have
   - Transactions
   - Abstract the time_format

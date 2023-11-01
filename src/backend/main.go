@@ -42,12 +42,14 @@ func main() {
 	router.POST("/login", controller.Login)
 
 	router.PUT("/slots", controller.Auth("doctor", controller.CreateSlot))
+	router.PUT("/slots/:id", controller.Auth("doctor", controller.UpdateSlot))
 	router.DELETE("/slots/:id", controller.Auth("doctor", controller.DeleteSlot))
 	router.GET("/slots", controller.Auth("doctor", controller.GetSlots))
 	router.GET("/doctor-appointments", controller.Auth("doctor", controller.GetDoctorAppointments))
 
 	router.GET("/appointments", controller.Auth("patient", controller.GetAppointments))
 	router.PUT("/appointments", controller.Auth("patient", controller.CreateAppointment))
+	router.PUT("/appointments/:id", controller.Auth("patient", controller.UpdateAppointment))
 	router.DELETE("/appointments/:id", controller.Auth("patient", controller.DeleteAppointment))
 	router.GET("/doctors", controller.Auth("patient", controller.GetDoctors))
 	router.GET("/doctors/:id/slots", controller.Auth("patient", controller.GetAvailableSlotsForDoctor))

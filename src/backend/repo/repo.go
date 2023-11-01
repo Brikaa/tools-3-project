@@ -224,7 +224,17 @@ func UpdateSlotByIdAndDoctorId(
 ) (bool, error) {
 	return update(
 		db,
-		"UPDATE Slot WHERE id = ? AND doctorId = ? SET start = ?, end = ?",
+		"UPDATE Slot SET start = ?, end = ? WHERE id = ? AND doctorId = ?",
 		[]any{slotId, doctorId, start, end},
+	)
+}
+
+func UpdateAppointmentByIdAndPatientId(
+	db *sql.DB, appointmentId string, patientId string, slotId string,
+) (bool, error) {
+	return update(
+		db,
+		"UPDATE Appointment SET slotId = ? WHERE id = ? AND patientId = ?",
+		[]any{appointmentId, patientId, slotId},
 	)
 }

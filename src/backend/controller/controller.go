@@ -38,7 +38,7 @@ type PutSlotRequest struct {
 	End   time.Time `json:"end" time_format:"RFC3339"`
 }
 
-type CreateAppointmentRequest struct {
+type PutAppointmentRequest struct {
 	SlotID string `json:"slotId"`
 }
 
@@ -257,8 +257,10 @@ func (controller Controller) GetAppointments(userCtx *UserContext, ctx *g.Contex
 	ctx.IndentedJSON(http.StatusOK, g.H{"appointments": appointments})
 }
 
-func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Context) {
-	var req CreateAppointmentRequest
+func (controller Controller) withPutAppointmentBusinessRules(
+	userCtx *UserContext, ctx *g.Context, fn func(*PutAppointmentRequest),
+) {
+	var req PutAppointmentRequest
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
@@ -283,12 +285,33 @@ func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Cont
 		return
 	}
 
-	if err := repo.InsertAppointment(controller.db, req.SlotID, userCtx.ID); err != nil {
-		handleInternalServerError(ctx, &err)
-		return
-	}
+	fn(&req)
+}
 
-	ctx.Status(http.StatusOK)
+func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Context) {
+	controller.withPutAppointmentBusinessRules(userCtx, ctx, func(req *PutAppointmentRequest) {
+		if err := repo.InsertAppointment(controller.db, req.SlotID, userCtx.ID); err != nil {
+			handleInternalServerError(ctx, &err)
+			return
+		}
+
+		ctx.Status(http.StatusCreated)
+	})
+}
+
+func (controller Controller) UpdateAppointment(userCtx *UserContext, ctx *g.Context) {
+	controller.withPutAppointmentBusinessRules(userCtx, ctx, func(req *PutAppointmentRequest) {
+		updated, err := repo.UpdateAppointmentByIdAndPatientId(controller.db, ctx.Param("id"), userCtx.ID, req.SlotID)
+		if err != nil {
+			handleInternalServerError(ctx, &err)
+			return
+		}
+		if !updated {
+			ctx.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		ctx.Status(http.StatusOK)
+	})
 }
 
 func (controller Controller) DeleteAppointment(userCtx *UserContext, ctx *g.Context) {
