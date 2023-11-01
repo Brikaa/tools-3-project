@@ -1,3 +1,4 @@
-if [ ! -f .env ]; then
-  cp .env.sample .env
+cp .env.sample .env
+if [ -f .env.overrides ]; then
+  cat .env.overrides >> .env
 fi

@@ -21,7 +21,7 @@ func main() {
 		User:      os.Getenv("MYSQL_USER"),
 		Passwd:    os.Getenv("MYSQL_PASSWORD"),
 		Net:       "tcp",
-		Addr:      "database:3306",
+		Addr:      fmt.Sprintf("%s:%s", os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT")),
 		DBName:    "app",
 		ParseTime: true,
 	}
@@ -52,5 +52,5 @@ func main() {
 	router.GET("/doctors", controller.Auth("patient", controller.GetDoctors))
 	router.GET("/doctors/:id/slots", controller.Auth("patient", controller.GetAvailableSlotsForDoctor))
 
-	router.Run(":8000")
+	router.Run(fmt.Sprintf(":%s", os.Getenv("BACKEND_PORT")))
 }
