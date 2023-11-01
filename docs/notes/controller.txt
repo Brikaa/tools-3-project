@@ -36,6 +36,12 @@
     - 400
   - repo insert slot
   - 201
+- PUT /slots/{id} (auth doctor)
+  - Same business rules as PUT /slots
+  - updated = repo update slot where id = req.id
+  - if !updated
+    - 404
+  - 200
 - GET /slots (auth doctor)
   - repo select slots where doctorId = userId order by start
 - GET /doctor-appointments (auth doctor)
@@ -57,6 +63,12 @@
     - 400
   - repo insert into appointment
   - 200
+- PUT /appointments/{id} (auth patient)
+  - Same business rules as PUT /appointments
+  - updated = repo update appointment where id = req.id
+  - if !updated
+    - 404
+  - 200
 - DELETE /appointments/{id} (auth patient)
   - updated = repo delete from appointments where id = req.id and patientId = userId
   - if updated = 0
@@ -69,8 +81,6 @@
   - slots = select Slot where Slot.doctorId = req.id and Appointment.id = null left join Appointment
 
 - TODO
-  - env overrides instead of env
-  - MYSQL_PORT, MYSQL_HOST, BACKEND_PORT in env
   - Update slot, update appointment
 
 - Nice to have

@@ -33,7 +33,7 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-type CreateSlotRequest struct {
+type PutSlotRequest struct {
 	Start time.Time `json:"start" time_format:"RFC3339"`
 	End   time.Time `json:"end" time_format:"RFC3339"`
 }
@@ -162,8 +162,10 @@ func (controller Controller) Login(ctx *g.Context) {
 		g.H{"token": base64.StdEncoding.EncodeToString([]byte(user.ID + ":" + user.Password))})
 }
 
-func (controller Controller) CreateSlot(userCtx *UserContext, ctx *g.Context) {
-	var req CreateSlotRequest
+func (controller Controller) withPutSlotBusinessRules(
+	userCtx *UserContext, ctx *g.Context, fn func(*PutSlotRequest),
+) {
+	var req PutSlotRequest
 	if err := ctx.BindJSON(&req); err != nil {
 		return
 	}
@@ -187,11 +189,32 @@ func (controller Controller) CreateSlot(userCtx *UserContext, ctx *g.Context) {
 		)
 		return
 	}
-	if err := repo.InsertSlot(controller.db, req.Start, req.End, userCtx.ID); err != nil {
-		handleInternalServerError(ctx, &err)
-		return
-	}
-	ctx.Status(http.StatusCreated)
+	fn(&req)
+}
+
+func (controller Controller) CreateSlot(userCtx *UserContext, ctx *g.Context) {
+	controller.withPutSlotBusinessRules(userCtx, ctx, func(req *PutSlotRequest) {
+		if err := repo.InsertSlot(controller.db, req.Start, req.End, userCtx.ID); err != nil {
+			handleInternalServerError(ctx, &err)
+			return
+		}
+		ctx.Status(http.StatusCreated)
+	})
+}
+
+func (controller Controller) UpdateSlot(userCtx *UserContext, ctx *g.Context) {
+	controller.withPutSlotBusinessRules(userCtx, ctx, func(req *PutSlotRequest) {
+		updated, err := repo.UpdateSlotByIdAndDoctorId(controller.db, ctx.Param("id"), userCtx.ID, req.Start, req.End)
+		if err != nil {
+			handleInternalServerError(ctx, &err)
+			return
+		}
+		if !updated {
+			ctx.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		ctx.Status(http.StatusOK)
+	})
 }
 
 func (controller Controller) DeleteSlot(userCtx *UserContext, ctx *g.Context) {
@@ -262,6 +285,7 @@ func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Cont
 
 	if err := repo.InsertAppointment(controller.db, req.SlotID, userCtx.ID); err != nil {
 		handleInternalServerError(ctx, &err)
+		return
 	}
 
 	ctx.Status(http.StatusOK)

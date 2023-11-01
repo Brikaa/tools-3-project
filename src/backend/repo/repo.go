@@ -218,3 +218,13 @@ LEFT JOIN Appointment ON Appointment.slotId = Slot.id`,
 		},
 	)
 }
+
+func UpdateSlotByIdAndDoctorId(
+	db *sql.DB, slotId string, doctorId string, start time.Time, end time.Time,
+) (bool, error) {
+	return update(
+		db,
+		"UPDATE Slot WHERE id = ? AND doctorId = ? SET start = ?, end = ?",
+		[]any{slotId, doctorId, start, end},
+	)
+}
