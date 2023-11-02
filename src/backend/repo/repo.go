@@ -234,7 +234,7 @@ func UpdateSlotByIdAndDoctorId(
 	return update(
 		db,
 		"UPDATE Slot SET start = ?, end = ? WHERE id = ? AND doctorId = ?",
-		[]any{slotId, doctorId, start, end},
+		[]any{start, end, slotId, doctorId},
 	)
 }
 
@@ -244,6 +244,6 @@ func UpdateAppointmentByIdAndPatientId(
 	return update(
 		db,
 		"UPDATE Appointment SET slotId = ? WHERE id = ? AND patientId = ?",
-		[]any{appointmentId, patientId, slotId},
+		[]any{slotId, appointmentId, patientId},
 	)
 }

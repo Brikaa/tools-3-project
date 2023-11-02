@@ -285,13 +285,13 @@ if __name__ == "__main__":
     action(f"Get appointments ([{p2a2d2s3}])", get_appointments)
 
     action(
-        "Update appointment p2a2d2s3 -> p2a2d2s1", update_appointment(p2a2d2s3, d2s1)
+        f"Update appointment {p2a2d2s3} -> p2a2d2s1", lambda: update_appointment(p2a2d2s3, d2s1)
     )
     p2a2d2s1 = p2a2d2s3
     p2a2d2s3 = None
     action(f"Get slots for d2 ([{d2s3}])", lambda: get_available_slots_for_doctor(d2))
     action(
-        "Update appointment p2a2d2s1 -> p2a2d1s3", update_appointment(p2a2d2s1, d1s3)
+        "Update appointment p2a2d2s1 -> p2a2d1s3", lambda: update_appointment(p2a2d2s1, d1s3)
     )
     p2a2d1s3 = p2a2d2s1
     p2a2d2s1 = None
@@ -302,6 +302,7 @@ if __name__ == "__main__":
 
     action("Login d2", lambda: login(d2_username, d2_password))
     action(f"Get appointments ([{p1a2d2s2}])", get_doctor_appointments)
-    action(f"Update slot d2s2", lambda: update_slot(d2s2, d1s1_start, d1s1_end))
-    action(f"Delete slot d2s2", lambda: delete_slot(d2s2))
-    action(f"Get appointments ([])", get_appointments)
+    action(f"Delete slot {d2s1}", lambda: delete_slot(d2s1))
+    action(f"Update slot {d2s2}", lambda: update_slot(d2s2, d2s1_start, d2s1_end))
+    action(f"Delete slot {d2s2}", lambda: delete_slot(d2s2))
+    action(f"Get appointments ([])", get_doctor_appointments)
