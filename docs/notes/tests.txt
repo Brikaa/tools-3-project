@@ -3,6 +3,8 @@
 - Create doctor d1
 - Create doctor d2
 - Create doctor d2 (invalid)
+- Create i1 (invalid role)
+- Create i2 (invalid username)
 - Log in p2 invalid password
 - Log in p2
 - Create slot in the future (forbidden)
@@ -53,6 +55,7 @@
 - Get slots for d2 ([d2s1, d2s3])
 - Log in d2
 - Get appointments ([p1a2d2s2])
+- Delete slot d2s1
 - Update slot d2s2
 - Delete slot d2s2
 - Get appointments ([])
