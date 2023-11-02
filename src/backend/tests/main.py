@@ -19,7 +19,7 @@ def send_request(method, endpoint, payload):
 def action(message, function):
     print(message)
     result = function()
-    print(result, "\n")
+    print(str(result).replace("\\n", "\n"), "\n")
     return result
 
 
@@ -78,7 +78,7 @@ def get_doctors():
 
 
 def get_available_slots_for_doctor(id):
-    res = send_request("GET", f"doctor/{id}/slots", None)
+    res = send_request("GET", f"doctors/{id}/slots", None)
     return res.text, res.status_code
 
 
@@ -148,7 +148,9 @@ if __name__ == "__main__":
     d1s3_start = d1s2_end + datetime.timedelta(hours=1)
     d1s3_end = d1s3_start + datetime.timedelta(hours=1)
 
-    d2s1_start = datetime.datetime.now() + datetime.timedelta(minutes=30)
+    d2s1_start = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(
+        minutes=30
+    )
     d2s1_end = d2s1_start + datetime.timedelta(hours=2)
 
     d2s2_start = d2s1_end + datetime.timedelta(hours=3)
@@ -195,9 +197,9 @@ if __name__ == "__main__":
         f"Get slots ([{d1s1_start}, {d1s2_start}, {d1s3_start}])", get_slots
     )
     slots = json.loads(slots_text)["slots"]
-    d1s1 = get_slot_id_by_start_date(slots, d1s1_start)
-    d1s2 = get_slot_id_by_start_date(slots, d1s2_start)
-    d1s3 = get_slot_id_by_start_date(slots, d1s3_start)
+    d1s1 = slots[0]["id"]
+    d1s2 = slots[1]["id"]
+    d1s3 = slots[2]["id"]
 
     action("Get appointments ([])", get_doctor_appointments)
 
@@ -211,14 +213,14 @@ if __name__ == "__main__":
         f"Get slots ([{d2s1_start}, {d2s2_start}, {d2s3_start}])", get_slots
     )
     slots = json.loads(slots_text)["slots"]
-    d2s1 = get_slot_id_by_start_date(slots, d2s1_start)
-    d2s2 = get_slot_id_by_start_date(slots, d2s2_start)
-    d2s3 = get_slot_id_by_start_date(slots, d2s3_start)
+    d2s1 = slots[0]["id"]
+    d2s2 = slots[1]["id"]
+    d2s3 = slots[2]["id"]
 
     action("Login p1", lambda: login(p1_username, p1_password))
 
     doctors_text, _ = action("Get doctors ([d1, d2])", get_doctors)
-    doctors = json.loads(doctors)["doctors"]
+    doctors = json.loads(doctors_text)["doctors"]
     d1 = get_doctor_id_by_username(doctors, "d1")
     d2 = get_doctor_id_by_username(doctors, "d2")
 

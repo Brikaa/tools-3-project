@@ -125,11 +125,14 @@ func GetSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, error) {
 func GetAppointmentsByDoctorId(db *sql.DB, doctorId string) ([]*model.AppointmentXSlotXPatient, error) {
 	return selectAll(
 		db,
-		`SELECT Appointment.id, Slot.id, Slot.start, Slot.end, Patient.id, Patient.username
-FROM Appointment WHERE Doctor.id = ?
-LEFT JOIN Slot ON Appointment.slotId = Slot.id
-LEFT JOIN User AS Patient ON Appointment.patientId = Patient.id
-LEFT JOIN User AS Doctor ON Slot.doctorId = Doctor.id`,
+		`
+		SELECT Appointment.id, Slot.id, Slot.start, Slot.end, Patient.id, Patient.username
+		FROM Appointment
+		LEFT JOIN Slot ON Appointment.slotId = Slot.id
+		LEFT JOIN User Patient ON Appointment.patientId = Patient.id
+		LEFT JOIN User Doctor ON Slot.doctorId = Doctor.id
+		WHERE Doctor.id = ?
+		`,
 		[]any{doctorId},
 		func(rows *sql.Rows, appointment *model.AppointmentXSlotXPatient) error {
 			return rows.Scan(
@@ -147,11 +150,14 @@ LEFT JOIN User AS Doctor ON Slot.doctorId = Doctor.id`,
 func GetAppointmentsByPatientId(db *sql.DB, patientId string) ([]*model.AppointmentXSlotXDoctor, error) {
 	return selectAll(
 		db,
-		`SELECT Appointment.id, Slot.id, Slot.start, Slot.end, Doctor.id, Doctor.username
-FROM Appointment WHERE Patient.id = ?
-LEFT JOIN Slot ON Appointment.slotID = Slot.id
-LEFT JOIN User AS Patient ON Appointment.patientId = Patient.id
-LEFT JOIN USER AS Doctor ON Slot.doctorId = Doctor.id`,
+		`
+		SELECT Appointment.id, Slot.id, Slot.start, Slot.end, Doctor.id, Doctor.username
+		FROM Appointment
+		LEFT JOIN Slot ON Appointment.slotID = Slot.id
+		LEFT JOIN User Patient ON Appointment.patientId = Patient.id
+		LEFT JOIN User Doctor ON Slot.doctorId = Doctor.id
+		WHERE Patient.id = ?
+		`,
 		[]any{patientId},
 		func(rows *sql.Rows, appointment *model.AppointmentXSlotXDoctor) error {
 			return rows.Scan(
@@ -210,8 +216,11 @@ func GetDoctors(db *sql.DB) ([]*model.Doctor, error) {
 func GetAvailableSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, error) {
 	return selectAll(
 		db,
-		`SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId FROM Slot WHERE doctorId = ? AND Appointment.id IS NULL
-LEFT JOIN Appointment ON Appointment.slotId = Slot.id`,
+		`
+		SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId FROM Slot
+		LEFT JOIN Appointment ON Appointment.slotId = Slot.id
+		WHERE Slot.doctorId = ? AND Appointment.id IS NULL
+		`,
 		[]any{doctorId},
 		func(rows *sql.Rows, slot *model.Slot) error {
 			return rows.Scan(&slot.ID, &slot.Start, &slot.End)

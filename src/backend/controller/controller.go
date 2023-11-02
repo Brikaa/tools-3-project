@@ -56,7 +56,7 @@ func errorResponse(message string) *g.H {
 }
 
 func handleInternalServerError(ctx *g.Context, err *error) {
-	log.Print(err)
+	log.Print(*err)
 	ctx.AbortWithStatus(http.StatusInternalServerError)
 }
 
