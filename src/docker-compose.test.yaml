@@ -1,14 +1,7 @@
-networks:
-  src_default:
-    name: src_default
-    external: true
-
 services:
   backend_tester:
     container_name: backend_tester
     image: backend_tester
     build: ./backend/tests
-    networks:
-      - src_default
     environment:
       - BACKEND_PORT=${BACKEND_PORT}
