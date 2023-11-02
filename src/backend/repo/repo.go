@@ -184,7 +184,7 @@ func GetAppointmentIdBySlotId(db *sql.DB, slotId string) (*string, error) {
 func GetSlotIdBySlotId(db *sql.DB, slotId string) (*string, error) {
 	return selectOne(
 		db,
-		"SELECT Slot.id FROM Slot WHERE slotId = ?",
+		"SELECT id FROM Slot WHERE id = ?",
 		[]any{slotId},
 		func(slotId *string) []any { return []any{slotId} },
 	)
@@ -223,7 +223,7 @@ func GetAvailableSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, er
 		`,
 		[]any{doctorId},
 		func(rows *sql.Rows, slot *model.Slot) error {
-			return rows.Scan(&slot.ID, &slot.Start, &slot.End)
+			return rows.Scan(&slot.ID, &slot.Start, &slot.End, &slot.DoctorID)
 		},
 	)
 }

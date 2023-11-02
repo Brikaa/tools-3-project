@@ -277,7 +277,7 @@ func (controller Controller) withPutAppointmentBusinessRules(
 
 	target, targetErr := repo.GetSlotIdBySlotId(controller.db, req.SlotID)
 	if targetErr != nil {
-		handleInternalServerError(ctx, &err)
+		handleInternalServerError(ctx, &targetErr)
 		return
 	}
 	if target == nil {
