@@ -1,6 +1,7 @@
-volumes:
-  database:
-    external: false
+networks:
+  src_default:
+    name: src_default
+    external: true
 
 services:
   backend_tester:
@@ -11,9 +12,3 @@ services:
       - src_default
     environment:
       - BACKEND_PORT=${BACKEND_PORT}
-
-networks:
-  src_default:
-    name: src_default
-    external: true
-

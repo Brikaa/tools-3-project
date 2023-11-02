@@ -2,16 +2,19 @@ package model
 
 import "time"
 
-type User struct {
-	ID       string
-	Username string
-	Password string
-	Role     string
-}
-
-type Doctor struct {
+type BareUser struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
+}
+
+type UserWithoutPassword struct {
+	BareUser
+	Role string `json:"role"`
+}
+
+type User struct {
+	UserWithoutPassword
+	Password string
 }
 
 type Slot struct {

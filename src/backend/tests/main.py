@@ -87,14 +87,6 @@ def create_appointment(slot_id):
     return res.text, res.status_code
 
 
-def get_slot_id_by_start_date(slots, start):
-    return list(
-        filter(
-            lambda slot: datetime.datetime.fromisoformat(slot["start"]) == start, slots
-        )
-    )[0]["id"]
-
-
 def get_doctor_id_by_username(doctors, username):
     return list(filter(lambda doctor: doctor["username"] == username, doctors))[0]["id"]
 
@@ -122,6 +114,11 @@ def delete_slot(id):
 
 def update_appointment(id, slot_id):
     res = send_request("PUT", f"appointments/{id}", {"slotId": slot_id})
+    return res.text, res.status_code
+
+
+def get_current_user():
+    res = send_request("GET", "user", None)
     return res.text, res.status_code
 
 
@@ -285,13 +282,15 @@ if __name__ == "__main__":
     action(f"Get appointments ([{p2a2d2s3}])", get_appointments)
 
     action(
-        f"Update appointment {p2a2d2s3} -> p2a2d2s1", lambda: update_appointment(p2a2d2s3, d2s1)
+        f"Update appointment {p2a2d2s3} -> p2a2d2s1",
+        lambda: update_appointment(p2a2d2s3, d2s1),
     )
     p2a2d2s1 = p2a2d2s3
     p2a2d2s3 = None
     action(f"Get slots for d2 ([{d2s3}])", lambda: get_available_slots_for_doctor(d2))
     action(
-        "Update appointment p2a2d2s1 -> p2a2d1s3", lambda: update_appointment(p2a2d2s1, d1s3)
+        "Update appointment p2a2d2s1 -> p2a2d1s3",
+        lambda: update_appointment(p2a2d2s1, d1s3),
     )
     p2a2d1s3 = p2a2d2s1
     p2a2d2s1 = None
@@ -306,3 +305,4 @@ if __name__ == "__main__":
     action(f"Update slot {d2s2}", lambda: update_slot(d2s2, d2s1_start, d2s1_end))
     action(f"Delete slot {d2s2}", lambda: delete_slot(d2s2))
     action(f"Get appointments ([])", get_doctor_appointments)
+    action(f"Get current user (d2)", get_current_user)

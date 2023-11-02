@@ -82,6 +82,14 @@ func GetUserByIdAndPassword(db *sql.DB, id string, password string) (*model.User
 	return selectOneUser(db, "id = ? AND password = ?", []any{id, password})
 }
 
+func GetUserById(db *sql.DB, id string) (*model.UserWithoutPassword, error) {
+	return selectOne(
+		db,
+		"SELECT id, username, role FROM User WHERE id = ?",
+		[]any{id},
+		func(user *model.UserWithoutPassword) []any { return []any{&user.ID, &user.Username, &user.Role} })
+}
+
 func InsertUser(db *sql.DB, username, password, role string) error {
 	return insert(
 		db,
@@ -202,12 +210,12 @@ func DeleteAppointmentByIdAndPatientId(db *sql.DB, appointmentId string, patient
 	return update(db, "DELETE FROM Appointment WHERE id = ? AND patientId = ?", []any{appointmentId, patientId})
 }
 
-func GetDoctors(db *sql.DB) ([]*model.Doctor, error) {
+func GetDoctors(db *sql.DB) ([]*model.BareUser, error) {
 	return selectAll(
 		db,
 		`SELECT User.id, User.username FROM User WHERE User.role = "doctor"`,
 		[]any{},
-		func(rows *sql.Rows, doctor *model.Doctor) error {
+		func(rows *sql.Rows, doctor *model.BareUser) error {
 			return rows.Scan(&doctor.ID, &doctor.Username)
 		},
 	)

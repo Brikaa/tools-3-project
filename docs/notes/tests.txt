@@ -56,3 +56,4 @@
 - Update slot d2s2
 - Delete slot d2s2
 - Get appointments ([])
+- Get current user (d2)

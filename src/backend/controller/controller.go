@@ -344,3 +344,16 @@ func (controller Controller) GetAvailableSlotsForDoctor(_ *UserContext, ctx *g.C
 	}
 	ctx.IndentedJSON(http.StatusOK, g.H{"slots": slots})
 }
+
+func (controller Controller) GetCurrentUser(userContext *UserContext, ctx *g.Context) {
+	user, err := repo.GetUserById(controller.db, userContext.ID)
+	if err != nil {
+		handleInternalServerError(ctx, &err)
+		return
+	}
+	if user == nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	ctx.IndentedJSON(http.StatusOK, g.H{"user": user})
+}

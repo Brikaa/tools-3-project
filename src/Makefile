@@ -5,7 +5,6 @@ docker_compose_test = docker-compose -f docker-compose.test.yaml
 
 dev:
 	./create-env.sh
-	make stop
 	make build
 	make run
 	make logs

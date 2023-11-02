@@ -27,6 +27,10 @@
   - user = repo select user by username and password
   - if (!user) return 400 "Invalid username or password"
   - return { "token": base64encode("id:password") }
+- GET /user
+  - user (without password) = repo select by userId
+  - if (!user) return 404
+  - return { "user": user }
 
 - PUT /slots (auth doctor)
   - reservedSlot = repo select slot
@@ -84,3 +88,4 @@
   - Transactions
   - Abstract the time_format
   - Abstraction for CRUD methods to avoid boilerplate
+  - Actual asserts in test cases

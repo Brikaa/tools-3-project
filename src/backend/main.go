@@ -41,6 +41,8 @@ func main() {
 	router.POST("/signup", controller.Signup)
 	router.POST("/login", controller.Login)
 
+	router.GET("/user", controller.Auth("*", controller.GetCurrentUser))
+
 	router.PUT("/slots", controller.Auth("doctor", controller.CreateSlot))
 	router.PUT("/slots/:id", controller.Auth("doctor", controller.UpdateSlot))
 	router.DELETE("/slots/:id", controller.Auth("doctor", controller.DeleteSlot))
