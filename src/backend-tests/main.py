@@ -3,7 +3,7 @@ import json
 import datetime
 import os
 
-BASE = f"http://backend_runner:{os.environ['BACKEND_PORT']}"
+BASE = f"http://backend:{os.environ['BACKEND_PORT']}"
 headers = {"Content-Type": "application/json"}
 
 

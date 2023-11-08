@@ -3,9 +3,17 @@ volumes:
     external: false
 
 services:
-  backend_runner:
-    container_name: backend_runner
-    image: backend_runner
+  frontend:
+    container_name: frontend
+    image: frontend
+    build: ./frontend
+    ports:
+      - '${FRONTEND_PORT}:${FRONTEND_PORT}'
+    depends_on:
+      - backend
+  backend:
+    container_name: backend
+    image: backend
     build: ./backend
     ports:
       - '${BACKEND_PORT}:${BACKEND_PORT}'

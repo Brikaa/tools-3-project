@@ -1,0 +1,15 @@
+- Root
+  - userCtx: {
+    id,
+    username,
+    role
+  }
+  - setUserCtx() from userCtxEvent
+
+===================================================
+
+- Root
+  - Guest Navbar [if userCtx = null] -> userCtxEvent
+  -
+  - PatientComponent [if userCtx.role = 'patient'] <- userCtx
+  - DoctorComponent [if userCtx.role = 'doctor'] <- userCtx
