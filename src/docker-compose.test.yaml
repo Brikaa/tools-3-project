@@ -2,6 +2,6 @@ services:
   backend_tester:
     container_name: backend_tester
     image: backend_tester
-    build: ./backend/tests
+    build: ./backend-tests
     environment:
       - BACKEND_PORT=${BACKEND_PORT}

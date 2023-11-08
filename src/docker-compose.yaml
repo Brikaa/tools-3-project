@@ -22,7 +22,7 @@ services:
   database:
     container_name: database
     image: database
-    build: ./backend/db
+    build: ./db
     volumes:
       - database:/var/lib/mysql
     environment:
