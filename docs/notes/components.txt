@@ -58,7 +58,6 @@
     - setAppointments() // refresh
   - OnInit()
     - setDoctors()
-    - selectedDoctorId = ""
     - setAppointments()
   - Doctor drop down (for doctor of doctors)
     - on change: setSelectedDoctorId(target.value)

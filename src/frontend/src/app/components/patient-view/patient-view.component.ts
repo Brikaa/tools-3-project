@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { isSuccessResponse, sendRequest } from '../../httpClient';
 import { Doctor, PatientAppointment, Slot, UserContext } from '../../types';
 
@@ -7,7 +7,7 @@ import { Doctor, PatientAppointment, Slot, UserContext } from '../../types';
   standalone: true,
   templateUrl: './patient-view.component.html'
 })
-export class PatientViewComponent {
+export class PatientViewComponent implements OnInit {
   @Input({ required: true }) ctx!: UserContext;
   doctors: Doctor[] = [];
   slots: Slot[] = [];
@@ -47,11 +47,35 @@ export class PatientViewComponent {
     });
   }
 
-  async scheduleAppointment() {
-    const res = await sendRequest(this.ctx, 'PUT', '/appointments');
-    if (!isSuccessResponse(res)) return;
+  #refreshAppointments() {
     this.setSelectedDoctorId(this.selectedDoctorId);
     this.setAppointments();
+  }
+
+  async scheduleAppointment(slotId: string) {
+    const res = await sendRequest(this.ctx, 'PUT', '/appointments', { slotId });
+    if (!isSuccessResponse(res)) return;
     alert('Appointment scheduled!');
+    this.#refreshAppointments();
+  }
+
+  async cancelAppointment(id: string) {
+    const res = await sendRequest(this.ctx, 'DELETE', `/appointments/${id}`);
+    if (!isSuccessResponse(res)) return;
+    alert('Appointment cancelled!');
+    this.#refreshAppointments();
+  }
+
+  async editAppointmentSlot(id: string) {
+    const slotId = prompt('Enter the new slot id');
+    const res = await sendRequest(this.ctx, 'PUT', `/appointments/${id}`, { slotId });
+    if (!isSuccessResponse(res)) return;
+    alert('Appointment modified!');
+    this.#refreshAppointments();
+  }
+
+  ngOnInit() {
+    this.setDoctors();
+    this.setAppointments();
   }
 }
