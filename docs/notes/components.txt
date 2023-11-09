@@ -101,7 +101,7 @@
     - Edit button for each one
       - editSlot(slot.id)
     - Delete button for each one
-      - deleteSlot()
+      - deleteSlot(slot.id)
   - Appointments (for appointment in appointments)
 
 ===================================================

@@ -1,4 +1,8 @@
 <div class="main">
   <guest-navbar *ngIf="!ctx" (userCtxEvent)="setUserCtx($event)" />
-  <user-navbar *ngIf="ctx" [ctx]="ctx" (userCtxEvent)="setUserCtx($event)" />
+  <ng-container *ngIf="ctx">
+    <user-navbar [ctx]="ctx" (userCtxEvent)="setUserCtx($event)" />
+    <doctor-view *ngIf="ctx.role == 'doctor'" [ctx]="ctx" />
+    <patient-view *ngIf="ctx.role == 'patient'" [ctx]="ctx" />
+  </ng-container>
 </div>

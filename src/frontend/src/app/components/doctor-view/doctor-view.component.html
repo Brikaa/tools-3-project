@@ -1,0 +1,19 @@
+<div class="doctorView">
+  <div class="slots">
+    <h1>Slots <button (click)="createSlot()">Create new</button></h1>
+    <ul>
+      <li *ngFor="let slot of slots">
+        ID: {{slot.id}} - start: {{slot.start}} - end: {{slot.end}} -
+        <button (click)="editSlot(slot.id)">edit</button> -
+        <button (click)="deleteSlot(slot.id)">edit</button>
+      </li>
+    </ul>
+  </div>
+  <div class="appointments">
+    <h1>Appointments</h1>
+    <li *ngFor="let appointment of appointments">
+      Slot ID: {{appointment.slotId}} - start: {{appointment.slotStart}} - end: {{appointment.slotEnd}} -
+      patient: {{appointment.patientUsername}}
+    </li>
+  </div>
+</div>

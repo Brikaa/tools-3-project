@@ -25,11 +25,19 @@ export interface Slot {
   end: string;
 }
 
-export interface PatientAppointment {
+interface Appointment {
   id: string;
   slotId: string;
-  slotStart: Date;
-  slotEnd: Date;
+  slotStart: string;
+  slotEnd: string;
+}
+
+export type PatientAppointment = Appointment & {
   doctorId: string;
   doctorUsername: string;
-}
+};
+
+export type DoctorAppointment = Appointment & {
+  patientId: string;
+  patientUsername: string;
+};
