@@ -5,11 +5,71 @@
     role
   }
   - setUserCtx() from userCtxEvent
+    - updateUserCtx()
+  - updateUserCtx()
+    - localStorage get token
+      - if no token, userCtx is null
+    - getAccount with token
+    - Determine userCtx based on getAccount response
+  - On init
+    - updateUserCtx()
+
+- GuestNavbar
+  - Login
+    - Post to login
+    - Put token in localStorage
+    - Trigger an update to userCtx (emit userCtxEvent)
+  - Register
+    - Post to register
+    - Alert result
+
+- UserNavbar
+  - {userCtx.role} {userCtx.username}
+  - Logout
+    - Remove token from localStorage
+    - Trigger an update to userCtx (emit userCtxEvent)
+
+- PatientComponent
+  - doctors: {id: username}
+  - slots: {id: {start, end}
+  - appointments: {id: {slotStart, slotEnd, doctorId, doctorUsername}}
+  - selectedDoctorId
+  - setDoctors()
+    - Get doctors
+    - doctors = received
+  - setSelectedDoctorId(id)
+    - selectedDoctorId = id
+    - get slots for doctor of id
+    - slots = received
+  - setAppointments()
+    - get appointments
+    - appointments = received
+  - scheduleAppointment(slotId)
+    - Put appointment at slotId
+    - setSelectedDoctorId(selectedDoctorId) // refresh
+  - cancelAppointment(id)
+    - Delete appointment of id
+    - setAppointments() // refresh
+  - EditAppointmentSlot(id)
+    - prompt: new slotId
+    - edit appointment of id to be of slotId
+    - setAppointments() // refresh
+  - Doctor drop down (for doctor of doctors)
+    - on change: setSelectedDoctorId(target.value)
+  - Slots for that doctor (for slot of slots)
+    - Schedule appointment button if appointment.slotId not in slots
+      - scheduleAppointment(slot.id)
+  - Appointments (for appointment of appointments)
+    - Cancel appointment button
+      - cancelAppointment(appointment.id)
+    - Edit slot button
+      - editAppointmentSlot(appointment.id)
 
 ===================================================
+Components composition
 
 - Root
-  - Guest Navbar [if userCtx = null] -> userCtxEvent
-  -
+  - GuestNavbar [if userCtx = null] -> userCtxEvent
+  - UserNavbar [if userCtx != null] <- userCtx, -> UserCtxEvent
   - PatientComponent [if userCtx.role = 'patient'] <- userCtx
   - DoctorComponent [if userCtx.role = 'doctor'] <- userCtx
