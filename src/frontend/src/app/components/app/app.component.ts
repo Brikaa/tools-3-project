@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { User, UserContext } from '../../types';
 import { LOCAL_STORAGE_TOKEN } from '../../constants';
 import { isSuccessResponse, sendRequest } from '../../httpClient';
+import { GuestNavbarComponent } from '../guest-navbar/guest-navbar.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, GuestNavbarComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

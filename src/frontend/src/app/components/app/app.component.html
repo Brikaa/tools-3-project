@@ -1,1 +1,3 @@
-<div class="main">Hello World</div>
+<div class="main">
+  <guest-navbar *ngIf="!ctx" (userCtxEvent)="setUserCtx()" />
+</div>
