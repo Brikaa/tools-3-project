@@ -2,7 +2,8 @@
   - userCtx: {
     id,
     username,
-    role
+    role,
+    token
   }
   - setUserCtx()
     - localStorage get token
@@ -10,8 +11,6 @@
     - getAccount with token
     - Determine userCtx based on getAccount response
   - On init
-    - setUserCtx()
-  - On updateUserCtxEvent
     - setUserCtx()
 
 - GuestNavbar
