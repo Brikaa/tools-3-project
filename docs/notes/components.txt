@@ -54,6 +54,10 @@
     - prompt: new slotId
     - edit appointment of id to be of slotId
     - setAppointments() // refresh
+  - OnInit()
+    - setDoctors()
+    - selectedDoctorId = ""
+    - setAppointments()
   - Doctor drop down (for doctor of doctors)
     - on change: setSelectedDoctorId(target.value)
   - Slots for that doctor (for slot of slots)
@@ -64,6 +68,40 @@
       - cancelAppointment(appointment.id)
     - Edit slot button
       - editAppointmentSlot(appointment.id)
+
+- DoctorComponent
+  - slots
+  - appointments
+  - setSlots()
+    - get slots
+    - slots = received
+  - setAppointments()
+    - get doctor appointments
+    - appointments = received
+  - createSlot()
+    - prompt: startDate
+    - prompt: endDate
+    - create slot with startDate and endDate
+    - setSlots() // refresh
+  - editSlot(slotId)
+    - prompt: startDate
+    - prompt: endDate
+    - update slot of slotId with startDate and endDate
+    - setSlots() // refresh
+  - deleteSlot(slotId)
+    - delete slot of slotId
+    - setSlots() // refresh
+  - onInit()
+    - setSlots()
+    - setAppointments()
+  - Slots (for slot in slots)
+    - "create new" button at top
+      - createSlot()
+    - Edit button for each one
+      - editSlot(slot.id)
+    - Delete button for each one
+      - deleteSlot()
+  - Appointments (for appointment in appointments)
 
 ===================================================
 Components composition
