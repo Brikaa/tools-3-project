@@ -1,4 +1,4 @@
 <div class="main">
-  <guest-navbar *ngIf="!ctx" (userCtxEvent)="setUserCtx()" />
-  <user-navbar *ngIf="ctx" [ctx]="ctx" (userCtxEvent)="setUserCtx()" />
+  <guest-navbar *ngIf="!ctx" (userCtxEvent)="setUserCtx($event)" />
+  <user-navbar *ngIf="ctx" [ctx]="ctx" (userCtxEvent)="setUserCtx($event)" />
 </div>

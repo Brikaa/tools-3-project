@@ -5,19 +5,20 @@
     role,
     token
   }
-  - setUserCtx()
-    - localStorage get token
-      - if no token, userCtx is null
-    - getAccount with token
-    - Determine userCtx based on getAccount response
+  - setUserCtx(token)
+    - if token
+      - getAccount with token
+      - Determine userCtx based on getAccount response
+      - localStorage put token
+    else
+      - userCtx is null
   - On init
-    - setUserCtx()
+    - setUserCtx(localStorage.getItem(token))
 
 - GuestNavbar
   - Login
     - Post to login
-    - Put token in localStorage
-    - emit userCtxEvent
+    - emit userCtxEvent(token)
   - Register
     - Post to register
     - Alert result
@@ -25,8 +26,7 @@
 - UserNavbar
   - {userCtx.role} {userCtx.username}
   - Logout
-    - Remove token from localStorage
-    - emit userCtxEvent
+    - emit userCtxEvent()
 
 - PatientComponent
   - doctors: doctor[]

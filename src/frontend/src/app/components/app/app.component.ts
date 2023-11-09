@@ -16,8 +16,7 @@ import { UserNavbarComponent } from '../user-navbar/user-navbar.component';
 export class AppComponent implements OnInit {
   ctx: UserContext | null = null;
 
-  async setUserCtx() {
-    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN);
+  async setUserCtx(token: string | null | undefined) {
     if (token) {
       const res = await sendRequest(this.ctx, 'GET', 'user');
       if (isSuccessResponse(res)) {
@@ -29,10 +28,14 @@ export class AppComponent implements OnInit {
           username: user.username
         };
       }
+      localStorage.setItem(LOCAL_STORAGE_TOKEN, token);
+    } else {
+      this.ctx = null;
+      localStorage.removeItem(LOCAL_STORAGE_TOKEN);
     }
   }
 
   ngOnInit(): void {
-    this.setUserCtx();
+    this.setUserCtx(localStorage.getItem(LOCAL_STORAGE_TOKEN));
   }
 }

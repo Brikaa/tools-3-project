@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { isSuccessResponse, sendRequest } from '../../httpClient';
-import { LOCAL_STORAGE_TOKEN } from '../../constants';
 
 @Component({
   selector: 'guest-navbar',
@@ -28,9 +27,8 @@ export class GuestNavbarComponent {
       if (!isSuccessResponse(response)) {
         return;
       }
-      const body = await response.json();
-      localStorage.setItem(LOCAL_STORAGE_TOKEN, body.token);
-      this.userCtxEvent.emit();
+      const body: { token: string } = await response.json();
+      this.userCtxEvent.emit(body.token);
     });
   }
 

@@ -1,0 +1,5 @@
+<div class="patientView">
+  <select (selectionchange)="onSelectedDoctorChange($event.target!)">
+    <option *ngFor="let doctor of doctors" [value]="doctor.id">{{doctor.username}}</option>
+  </select>
+</div>

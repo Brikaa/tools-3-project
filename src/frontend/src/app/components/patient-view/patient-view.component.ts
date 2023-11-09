@@ -1,10 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { isSuccessResponse, sendRequest } from '../../httpClient';
 import { Doctor, PatientAppointment, Slot, UserContext } from '../../types';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'patient-view',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './patient-view.component.html'
 })
 export class PatientViewComponent implements OnInit {
@@ -34,11 +36,15 @@ export class PatientViewComponent implements OnInit {
     });
   }
 
-  setSelectedDoctorId(id: string) {
+  #setSelectedDoctorId(id: string) {
     this.selectedDoctorId = id;
     this.#setEntities(this.slots, `/doctors/${id}/slots`, (body) => {
       this.slots = body['slots'];
     });
+  }
+
+  onSelectedDoctorChange(target: EventTarget) {
+    this.#setSelectedDoctorId((target as HTMLOptionElement).value);
   }
 
   setAppointments() {
@@ -48,7 +54,7 @@ export class PatientViewComponent implements OnInit {
   }
 
   #refreshAppointments() {
-    this.setSelectedDoctorId(this.selectedDoctorId);
+    this.#setSelectedDoctorId(this.selectedDoctorId);
     this.setAppointments();
   }
 
