@@ -4,21 +4,21 @@
     username,
     role
   }
-  - setUserCtx() from userCtxEvent
-    - updateUserCtx()
-  - updateUserCtx()
+  - setUserCtx()
     - localStorage get token
       - if no token, userCtx is null
     - getAccount with token
     - Determine userCtx based on getAccount response
   - On init
-    - updateUserCtx()
+    - setUserCtx()
+  - On updateUserCtxEvent
+    - setUserCtx()
 
 - GuestNavbar
   - Login
     - Post to login
     - Put token in localStorage
-    - Trigger an update to userCtx (emit userCtxEvent)
+    - emit userCtxEvent
   - Register
     - Post to register
     - Alert result
@@ -27,7 +27,7 @@
   - {userCtx.role} {userCtx.username}
   - Logout
     - Remove token from localStorage
-    - Trigger an update to userCtx (emit userCtxEvent)
+    - emit userCtxEvent
 
 - PatientComponent
   - doctors: {id: username}
