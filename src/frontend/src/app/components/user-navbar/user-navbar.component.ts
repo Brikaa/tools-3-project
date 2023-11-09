@@ -3,11 +3,11 @@ import { UserContext } from '../../types';
 import { LOCAL_STORAGE_TOKEN } from '../../constants';
 
 @Component({
-  selector: 'guest-navbar',
+  selector: 'user-navbar',
   standalone: true,
   templateUrl: './user-navbar.component.html'
 })
-export class UserNavBarComponent {
+export class UserNavbarComponent {
   @Input({ required: true }) ctx!: UserContext;
   @Output() userCtxEvent = new EventEmitter<string>();
 

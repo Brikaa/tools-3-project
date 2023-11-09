@@ -29,9 +29,9 @@
     - emit userCtxEvent
 
 - PatientComponent
-  - doctors: {id: username}
-  - slots: {id: {start, end}
-  - appointments: {id: {slotStart, slotEnd, doctorId, doctorUsername}}
+  - doctors: doctor[]
+  - slots: slot[]
+  - appointments: appointment[]
   - selectedDoctorId
   - setDoctors()
     - Get doctors
@@ -46,12 +46,15 @@
   - scheduleAppointment(slotId)
     - Put appointment at slotId
     - setSelectedDoctorId(selectedDoctorId) // refresh
+    - setAppointments() // refresh
   - cancelAppointment(id)
     - Delete appointment of id
+    - setSelectedDoctorId(selectedDoctorId) // refresh
     - setAppointments() // refresh
   - EditAppointmentSlot(id)
     - prompt: new slotId
     - edit appointment of id to be of slotId
+    - setSelectedDoctorId(selectedDoctorId) // refresh
     - setAppointments() // refresh
   - OnInit()
     - setDoctors()
@@ -60,7 +63,7 @@
   - Doctor drop down (for doctor of doctors)
     - on change: setSelectedDoctorId(target.value)
   - Slots for that doctor (for slot of slots)
-    - Schedule appointment button if appointment.slotId not in slots
+    - Schedule appointment
       - scheduleAppointment(slot.id)
   - Appointments (for appointment of appointments)
     - Cancel appointment button

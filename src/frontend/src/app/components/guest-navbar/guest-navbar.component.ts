@@ -10,7 +10,7 @@ import { LOCAL_STORAGE_TOKEN } from '../../constants';
 export class GuestNavbarComponent {
   @Output() userCtxEvent = new EventEmitter<string>();
 
-  withUsernameAndPassword(fn: (username: string, password: string) => any) {
+  #withUsernameAndPassword(fn: (username: string, password: string) => void) {
     const username = prompt('Username');
     if (!username) {
       return;
@@ -23,7 +23,7 @@ export class GuestNavbarComponent {
   }
 
   login() {
-    this.withUsernameAndPassword(async (username, password) => {
+    this.#withUsernameAndPassword(async (username, password) => {
       const response = await sendRequest(null, 'POST', 'login', { username, password });
       if (!isSuccessResponse(response)) {
         return;
@@ -35,7 +35,7 @@ export class GuestNavbarComponent {
   }
 
   register() {
-    this.withUsernameAndPassword(async (username, password) => {
+    this.#withUsernameAndPassword(async (username, password) => {
       const response = await sendRequest(null, 'POST', 'signup', { username, password });
       if (isSuccessResponse(response)) {
         alert('Registered successfully! You can now log in with your account.');

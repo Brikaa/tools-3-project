@@ -4,11 +4,12 @@ import { User, UserContext } from '../../types';
 import { LOCAL_STORAGE_TOKEN } from '../../constants';
 import { isSuccessResponse, sendRequest } from '../../httpClient';
 import { GuestNavbarComponent } from '../guest-navbar/guest-navbar.component';
+import { UserNavbarComponent } from '../user-navbar/user-navbar.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, GuestNavbarComponent],
+  imports: [CommonModule, GuestNavbarComponent, UserNavbarComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
