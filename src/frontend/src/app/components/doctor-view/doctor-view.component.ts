@@ -30,7 +30,7 @@ export class DoctorViewComponent implements OnInit {
   putSlot(endpoint: string, alertMessage: string) {
     withPromptValues(
       async (start, end) => {
-        const res = await sendRequest(this.ctx, 'PUT', endpoint, {
+        const res = await sendRequest(this.ctx.token, 'PUT', endpoint, {
           start,
           end
         });
@@ -55,7 +55,7 @@ export class DoctorViewComponent implements OnInit {
   }
 
   async deleteSlot(id: string) {
-    const res = await sendRequest(this.ctx, 'DELETE', `/slots/${id}`);
+    const res = await sendRequest(this.ctx.token, 'DELETE', `/slots/${id}`);
     if (!isSuccessResponse(res)) {
       return;
     }

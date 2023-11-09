@@ -7,7 +7,7 @@ export const setEntities = async <T>(
   endpoint: string,
   setter: (body: { [key: string]: T[] }) => void
 ) => {
-  const res = await sendRequest(ctx, 'GET', endpoint);
+  const res = await sendRequest(ctx.token, 'GET', endpoint);
   if (!isSuccessResponse(res)) {
     entities.length = 0;
     return;

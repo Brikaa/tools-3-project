@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
 
   async setUserCtx(token: string | null | undefined) {
     if (token) {
-      const res = await sendRequest(this.ctx, 'GET', 'user');
+      const res = await sendRequest(token, 'GET', 'user');
       if (isSuccessResponse(res)) {
         const user: User = await res.json();
         this.ctx = {

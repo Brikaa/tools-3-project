@@ -46,14 +46,14 @@ export class PatientViewComponent implements OnInit {
   }
 
   async scheduleAppointment(slotId: string) {
-    const res = await sendRequest(this.ctx, 'PUT', 'appointments', { slotId });
+    const res = await sendRequest(this.ctx.token, 'PUT', 'appointments', { slotId });
     if (!isSuccessResponse(res)) return;
     alert('Appointment scheduled!');
     this.#refreshAppointments();
   }
 
   async cancelAppointment(id: string) {
-    const res = await sendRequest(this.ctx, 'DELETE', `appointments/${id}`);
+    const res = await sendRequest(this.ctx.token, 'DELETE', `appointments/${id}`);
     if (!isSuccessResponse(res)) return;
     alert('Appointment cancelled!');
     this.#refreshAppointments();
@@ -61,7 +61,7 @@ export class PatientViewComponent implements OnInit {
 
   async editAppointmentSlot(id: string) {
     withPromptValues(async (slotId) => {
-      const res = await sendRequest(this.ctx, 'PUT', `appointments/${id}`, { slotId });
+      const res = await sendRequest(this.ctx.token, 'PUT', `appointments/${id}`, { slotId });
       if (!isSuccessResponse(res)) return;
       alert('Appointment modified!');
       this.#refreshAppointments();

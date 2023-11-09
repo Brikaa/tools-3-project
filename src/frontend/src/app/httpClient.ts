@@ -1,21 +1,22 @@
-import { BadRequestResponse, UserContext } from './types';
+import { API_URL } from './config';
+import { BadRequestResponse } from './types';
 
 export const sendRequest = async (
-  ctx: UserContext | null,
+  token: string | null,
   method: 'POST' | 'GET' | 'PUT' | 'DELETE',
   endpoint: string,
   body: any = null
 ) => {
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
-  if (ctx != null) {
-    headers.append('Authorization', 'BASIC ' + ctx.token);
+  if (token != null) {
+    headers.append('Authorization', 'Basic ' + token);
   }
 
   const requestOptions =
     body === null ? { method, headers } : { method, headers, body: JSON.stringify(body) };
 
-  const response = await fetch(endpoint, requestOptions);
+  const response = await fetch(API_URL + endpoint, requestOptions);
   if (response.status === 500) {
     alert('An internal error has occurred');
   } else if (response.status === 400) {

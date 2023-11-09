@@ -27,14 +27,15 @@ export class GuestNavbarComponent {
 
   register() {
     withPromptValues(
-      async (username, password) => {
-        const response = await sendRequest(null, 'POST', 'signup', { username, password });
+      async (username, password, role) => {
+        const response = await sendRequest(null, 'POST', 'signup', { username, password, role });
         if (isSuccessResponse(response)) {
           alert('Registered successfully! You can now log in with your account.');
         }
       },
       'Username',
-      'Password'
+      'Password',
+      'Role ("patient" or "doctor")'
     );
   }
 }
