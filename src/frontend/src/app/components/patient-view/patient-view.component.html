@@ -1,5 +1,27 @@
 <div class="patientView">
-  <select (selectionchange)="onSelectedDoctorChange($event.target!)">
-    <option *ngFor="let doctor of doctors" [value]="doctor.id">{{doctor.username}}</option>
-  </select>
+  <div class="slots">
+    <h1>Slots</h1>
+    <select (selectionchange)="onSelectedDoctorChange($event.target!)">
+      <option value="" selected disabled hidden>Choose a doctor</option>
+      <option *ngFor="let doctor of doctors" [value]="doctor.id">{{doctor.username}}</option>
+    </select>
+    <ul>
+      <li *ngFor="let slot of slots">
+        ID: {{slot.id}} - start: {{slot.start}} - end: {{slot.end}} -
+        <button (click)="scheduleAppointment(slot.id)">schedule appointment</button>
+      </li>
+    </ul>
+  </div>
+  <div class="appointments">
+    <h1>Appointments</h1>
+    <p>
+      Note that editing the slot id edits the appointment start date, end date, and doctor according to the target
+      slot. This is what is required in the project.
+    </p>
+    <li *ngFor="let appointment of appointments">
+      Slot ID: {{appointment.slotId}} <button (click)="editAppointmentSlot(appointment.id)">edit</button> -
+      start: {{appointment.slotStart}} - end: {{appointment.slotEnd}} - doctor: {{appointment.doctorUsername}} -
+      <button (click)="cancelAppointment(appointment.id)">cancel</button>
+    </li>
+  </div>
 </div>

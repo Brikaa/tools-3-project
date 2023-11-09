@@ -27,6 +27,7 @@ export interface Slot {
 
 export interface PatientAppointment {
   id: string;
+  slotId: string;
   slotStart: Date;
   slotEnd: Date;
   doctorId: string;
