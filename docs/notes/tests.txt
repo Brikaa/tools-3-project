@@ -69,6 +69,7 @@
 - Signup patient ps
 - Login ps
 - Create appointment psa1dss1
+- Get appointments ([psa1dss1])
 - Receive appointment creation via socket (received)
 - Delete appointment psa1dss1
 - Receive appointment deletion via socket (received)
