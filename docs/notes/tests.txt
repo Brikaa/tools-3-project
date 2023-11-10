@@ -60,3 +60,15 @@
 - Delete slot d2s2
 - Get appointments ([])
 - Get current user (d2)
+
+- Signup doctor ds
+- Login ds
+- Create slot dss1
+- Get slots ([dss1])
+- Watch next appointment update
+- Signup patient ps
+- Login ps
+- Create appointment psa1dss1
+- Receive appointment creation via socket (received)
+- Delete appointment psa1dss1
+- Receive appointment deletion via socket (received)

@@ -21,6 +21,7 @@ services:
       database:
         condition: service_healthy
       messaging:
+        condition: service_started
     environment:
       - MYSQL_DATABASE=app
       - MYSQL_USER=${MYSQL_USER}

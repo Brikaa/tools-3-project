@@ -1,7 +1,9 @@
 import requests
+from websocket import create_connection
 import json
 import datetime
 import os
+import asyncio
 
 BASE = f"http://backend:{os.environ['BACKEND_PORT']}"
 headers = {"Content-Type": "application/json"}
@@ -306,3 +308,30 @@ if __name__ == "__main__":
     action(f"Delete slot {d2s2}", lambda: delete_slot(d2s2))
     action(f"Get appointments ([])", get_doctor_appointments)
     action(f"Get current user (d2)", get_current_user)
+
+    dss1_start = d1s1_start
+    dss1_end = d1s1_end
+    action(f"Signup doctor ds", lambda: signup("ds", "ds123", "doctor"))
+    action(f"Login ds", lambda: login("ds", "ds123"))
+    action(f"Create slot dss1", lambda: create_slot(dss1_start, dss1_end))
+    slots_text, _ = action("Get slots ([dss1])", get_slots)
+    slots = json.loads(slots_text)["slots"]
+    dss1 = slots[0]["id"]
+    action(f"Signup patient ps", lambda: signup("ps", "ps123", "patient"))
+
+    ws = create_connection(
+        f"ws://backend:{os.environ['BACKEND_PORT']}/doctor-appointments/ws",
+        header=headers,
+    )
+    action(f"Login ps", lambda: login("ps", "ps123"))
+    action(
+        f"Create appointment psa1dss1",
+        lambda: create_appointment(dss1),
+    )
+    appointments_text, _ = action(f"Get appointments (psa1dss1)", get_appointments)
+    appointments = json.loads(appointments_text)["appointments"]
+    psa1dss1 = get_appointment_id_by_slot_id(appointments, dss1)
+    action(f"Receive appointment creation via socket ({psa1dss1} created)", ws.recv)
+    action(f"Delete appointment {psa1dss1}", lambda: delete_appointment(psa1dss1))
+    action(f"Receive appointment deletion via socket ({psa1dss1} deleted)", ws.recv)
+

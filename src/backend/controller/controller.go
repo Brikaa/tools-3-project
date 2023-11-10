@@ -13,6 +13,7 @@ import (
 
 	"github.com/Brikaa/tools-3-project/src/backend/repo"
 	g "github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -71,7 +72,7 @@ func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)
 		authHeader := ctx.GetHeader("Authorization")
 		authData := strings.Split(authHeader, " ")
 		if len(authData) != 2 {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Invalid authorization header"))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse("Invalid authorization header"))
 			return
 		}
 
@@ -289,9 +290,6 @@ func (controller Controller) withPutAppointmentBusinessRules(
 	}
 
 	fn(&req)
-	controller.publishMessage(
-		ctx, userCtx.ID, func() (*string, error) { return repo.GetDoctorIdBySlotId(controller.db, req.SlotID) },
-	)
 }
 
 func createChannelName(doctorId string) string {
@@ -309,14 +307,14 @@ func createMessage(doctorId, patientId, operation string) ([]byte, error) {
 }
 
 func (controller *Controller) publishMessage(
-	ctx *g.Context, patientId string, getDoctorId func() (*string, error),
+	ctx *g.Context, patientId, operation string, getDoctorId func() (*string, error),
 ) {
 	doctorId, err := getDoctorId()
 	if err != nil {
 		log.Print(err)
 		return
 	}
-	message, err := createMessage(*doctorId, patientId, "appointmentCreated")
+	message, err := createMessage(*doctorId, patientId, operation)
 	if err != nil {
 		log.Print(err)
 		return
@@ -336,6 +334,13 @@ func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Cont
 		}
 
 		ctx.Status(http.StatusCreated)
+		// Called ReservationCreated in the instructions
+		controller.publishMessage(
+			ctx,
+			userCtx.ID,
+			"AppointmentCreated",
+			func() (*string, error) { return repo.GetDoctorIdBySlotId(controller.db, req.SlotID) },
+		)
 	})
 }
 
@@ -351,10 +356,18 @@ func (controller Controller) UpdateAppointment(userCtx *UserContext, ctx *g.Cont
 			return
 		}
 		ctx.Status(http.StatusOK)
+		// Called ReservationUpdated in the instructions
+		controller.publishMessage(
+			ctx,
+			userCtx.ID,
+			"AppointmentUpdated",
+			func() (*string, error) { return repo.GetDoctorIdBySlotId(controller.db, req.SlotID) },
+		)
 	})
 }
 
 func (controller Controller) DeleteAppointment(userCtx *UserContext, ctx *g.Context) {
+	doctorId, doctorErr := repo.GetDoctorIdByAppointmentId(controller.db, ctx.Param("id"))
 	deleted, err := repo.DeleteAppointmentByIdAndPatientId(controller.db, ctx.Param("id"), userCtx.ID)
 	if err != nil {
 		handleInternalServerError(ctx, &err)
@@ -365,10 +378,12 @@ func (controller Controller) DeleteAppointment(userCtx *UserContext, ctx *g.Cont
 		return
 	}
 	ctx.Status(http.StatusOK)
+	// Called ReservationCancelled in the instructions
 	controller.publishMessage(
 		ctx,
 		userCtx.ID,
-		func() (*string, error) { return repo.GetDoctorIdByAppointmentId(controller.db, ctx.Param("id")) },
+		"AppointmentCancelled",
+		func() (*string, error) { return doctorId, doctorErr },
 	)
 }
 
@@ -401,4 +416,27 @@ func (controller Controller) GetCurrentUser(userContext *UserContext, ctx *g.Con
 		return
 	}
 	ctx.IndentedJSON(http.StatusOK, g.H{"user": user})
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func (controller *Controller) GetAppointmentUpdates(userCtx *UserContext, ctx *g.Context) {
+	ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	if err != nil {
+		return
+	}
+	defer ws.Close()
+	pubsub := controller.rdb.Subscribe(ctx, createChannelName(userCtx.ID))
+	defer pubsub.Close()
+	for {
+		msg, err := pubsub.ReceiveMessage(ctx)
+		if err != nil {
+			handleInternalServerError(ctx, &err)
+			return
+		}
+		ws.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
+	}
 }

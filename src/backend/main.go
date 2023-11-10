@@ -61,6 +61,7 @@ func main() {
 	router.DELETE("/slots/:id", controller.Auth("doctor", controller.DeleteSlot))
 	router.GET("/slots", controller.Auth("doctor", controller.GetSlots))
 	router.GET("/doctor-appointments", controller.Auth("doctor", controller.GetDoctorAppointments))
+	router.GET("/doctor-appointments/ws", controller.Auth("doctor", controller.GetAppointmentUpdates))
 
 	router.GET("/appointments", controller.Auth("patient", controller.GetAppointments))
 	router.PUT("/appointments", controller.Auth("patient", controller.CreateAppointment))

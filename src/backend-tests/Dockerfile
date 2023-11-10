@@ -1,6 +1,6 @@
 FROM python:3.12.0-alpine3.18
 
-RUN pip install requests
+RUN pip install requests websocket-client
 WORKDIR /app
 COPY ./main.py .
 

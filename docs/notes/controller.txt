@@ -82,11 +82,11 @@
   - doctorId = repo select doctorId from slot where id = req.slotId
   - send to appointment.(doctorId) topic: { doctorId, ctx.id, operation: "appointmentUpdated" }
 - DELETE /appointments/{id} (auth patient)
+  - doctorId = repo select doctorId from slot join appointment where appointment.id = req.id
   - updated = repo delete from appointments where id = req.id and patientId = userId
   - if updated = 0
     - 404
   - 200
-  - doctorId = repo select doctorId from slot join appointment where appointment.id = req.id
   - send to appointment.(slot.doctorId) topic: { doctorId, ctx.id, operation: "appointmentDeleted" }
 
 - GET /doctors (auth patient)
@@ -99,6 +99,8 @@
   - Abstract the time_format
   - Abstraction for CRUD methods to avoid boilerplate
   - Actual asserts in test cases
+  - Password hashing
+  - JWT tokens
 
 - Known low priority bugs
   - Patient can reserve an appointment in the past if the doctor has a slot in the past
