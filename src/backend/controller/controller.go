@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,14 +13,16 @@ import (
 
 	"github.com/Brikaa/tools-3-project/src/backend/repo"
 	g "github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 type Controller struct {
-	db *sql.DB
+	db  *sql.DB
+	rdb *redis.Client
 }
 
-func CreateController(db *sql.DB) Controller {
-	return Controller{db}
+func CreateController(db *sql.DB, rdb *redis.Client) Controller {
+	return Controller{db, rdb}
 }
 
 type SignUpRequest struct {
@@ -286,6 +289,43 @@ func (controller Controller) withPutAppointmentBusinessRules(
 	}
 
 	fn(&req)
+	controller.publishMessage(
+		ctx, userCtx.ID, func() (*string, error) { return repo.GetDoctorIdBySlotId(controller.db, req.SlotID) },
+	)
+}
+
+func createChannelName(doctorId string) string {
+	return fmt.Sprintf("appointment.%s", doctorId)
+}
+
+type Message struct {
+	DoctorId  string `json:"doctorId"`
+	PatientId string `json:"patientId"`
+	Operation string `json:"operation"`
+}
+
+func createMessage(doctorId, patientId, operation string) ([]byte, error) {
+	return json.Marshal(Message{DoctorId: doctorId, PatientId: patientId, Operation: operation})
+}
+
+func (controller *Controller) publishMessage(
+	ctx *g.Context, patientId string, getDoctorId func() (*string, error),
+) {
+	doctorId, err := getDoctorId()
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	message, err := createMessage(*doctorId, patientId, "appointmentCreated")
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	if err := controller.rdb.Publish(ctx, createChannelName(*doctorId), message).Err(); err != nil {
+		log.Print(err)
+		return
+	}
+
 }
 
 func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Context) {
@@ -325,6 +365,11 @@ func (controller Controller) DeleteAppointment(userCtx *UserContext, ctx *g.Cont
 		return
 	}
 	ctx.Status(http.StatusOK)
+	controller.publishMessage(
+		ctx,
+		userCtx.ID,
+		func() (*string, error) { return repo.GetDoctorIdByAppointmentId(controller.db, ctx.Param("id")) },
+	)
 }
 
 func (controller Controller) GetDoctors(_ *UserContext, ctx *g.Context) {

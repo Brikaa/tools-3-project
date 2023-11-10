@@ -50,6 +50,10 @@
   - repo select slots where doctorId = userId order by start
 - GET /doctor-appointments (auth doctor)
   - repo select appointments where slot.doctorId = userId order by slot.start
+- WS /doctor-appointments (auth doctor)
+  - Subscribe thread to appointment.(ctx.doctorId) channel
+  - On message receive
+    - forward message to socket
 - DELETE /slots/{id} (auth doctor)
   - noDeleted = repo delete where id = req.id and doctorId = userId
   - if noDeleted == 0
@@ -67,17 +71,23 @@
     - 400
   - repo insert into appointment
   - 200
+  - slotId = repo select doctorId from slot where id = req.slotId
+  - send to appointment.(doctorId) topic: { doctorId, ctx.id, operation: "appointmentCreated" }
 - PUT /appointments/{id} (auth patient)
   - Same business rules as PUT /appointments
   - updated = repo update appointment where id = req.id
   - if !updated
     - 404
   - 200
+  - doctorId = repo select doctorId from slot where id = req.slotId
+  - send to appointment.(doctorId) topic: { doctorId, ctx.id, operation: "appointmentUpdated" }
 - DELETE /appointments/{id} (auth patient)
   - updated = repo delete from appointments where id = req.id and patientId = userId
   - if updated = 0
     - 404
   - 200
+  - doctorId = repo select doctorId from slot join appointment where appointment.id = req.id
+  - send to appointment.(slot.doctorId) topic: { doctorId, ctx.id, operation: "appointmentDeleted" }
 
 - GET /doctors (auth patient)
   - doctors = select id, username from doctors

@@ -20,6 +20,7 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      messaging:
     environment:
       - MYSQL_DATABASE=app
       - MYSQL_USER=${MYSQL_USER}
@@ -43,3 +44,7 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
+  messaging:
+    container_name: messaging
+    # Like RabbitMQ and Kafka
+    image: redis:7.2.3-alpine3.18

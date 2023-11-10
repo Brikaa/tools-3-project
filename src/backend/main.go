@@ -11,6 +11,7 @@ import (
 	"github.com/gin-contrib/cors"
 	g "github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
+	"github.com/redis/go-redis/v9"
 )
 
 func health(c *g.Context) {
@@ -26,6 +27,11 @@ func main() {
 		DBName:    "app",
 		ParseTime: true,
 	}
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "messaging:6379",
+		Password: "",
+		DB:       0,
+	})
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +50,7 @@ func main() {
 	router.Use(cors.New(defaultCorsConfig))
 	router.GET("/health", health)
 
-	controller := controller.CreateController(db)
+	controller := controller.CreateController(db, rdb)
 	router.POST("/signup", controller.Signup)
 	router.POST("/login", controller.Login)
 

@@ -198,6 +198,24 @@ func GetSlotIdBySlotId(db *sql.DB, slotId string) (*string, error) {
 	)
 }
 
+func GetDoctorIdBySlotId(db *sql.DB, slotId string) (*string, error) {
+	return selectOne(
+		db,
+		"SELECT doctorId FROM Slot WHERE id = ?",
+		[]any{slotId},
+		func(doctorId *string) []any { return []any{doctorId} },
+	)
+}
+
+func GetDoctorIdByAppointmentId(db *sql.DB, appointmentId string) (*string, error) {
+	return selectOne(
+		db,
+		"SELECT doctorId FROM Slot INNER JOIN Appointment ON Slot.id = Appointment.slotId WHERE Appointment.id = ?",
+		[]any{appointmentId},
+		func(doctorId *string) []any { return []any{doctorId} },
+	)
+}
+
 func InsertAppointment(db *sql.DB, slotId string, patientId string) error {
 	return insert(
 		db,
