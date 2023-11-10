@@ -39,6 +39,7 @@ export class DoctorViewComponent implements OnInit {
           return;
         }
         this.setSlots();
+        this.setAppointments();
         alert(alertMessage);
       },
       'Start date (RFC 3339 format)',
@@ -52,7 +53,6 @@ export class DoctorViewComponent implements OnInit {
 
   editSlot(id: string) {
     this.putSlot(`slots/${id}`, 'Slot has been edited!');
-    this.setAppointments();
   }
 
   async deleteSlot(id: string) {

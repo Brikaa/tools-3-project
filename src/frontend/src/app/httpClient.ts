@@ -1,5 +1,4 @@
 import { API_URL } from './config';
-import { BadRequestResponse } from './types';
 
 export const sendRequest = async (
   token: string | null,
@@ -20,8 +19,8 @@ export const sendRequest = async (
   if (response.status === 500) {
     alert('An internal error has occurred');
   } else if (response.status === 400) {
-    const body: BadRequestResponse = await response.json();
-    alert(`Bad request: ${body.message}`);
+    const body = await response.text();
+    alert(`Bad request: ${body}`);
   }
   return response;
 };

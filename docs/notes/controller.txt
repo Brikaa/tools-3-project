@@ -89,3 +89,8 @@
   - Abstract the time_format
   - Abstraction for CRUD methods to avoid boilerplate
   - Actual asserts in test cases
+
+- Known low priority bugs
+  - Patient can reserve an appointment in the past if the doctor has a slot in the past
+  - Patient appointments can overlap
+  - When editing a slot, it can't overlap with its old version
