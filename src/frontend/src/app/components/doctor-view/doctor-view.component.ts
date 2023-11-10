@@ -8,7 +8,8 @@ import { isSuccessResponse, sendRequest } from '../../httpClient';
   selector: 'doctor-view',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './doctor-view.component.html'
+  templateUrl: './doctor-view.component.html',
+  styleUrls: ['../common/table.css']
 })
 export class DoctorViewComponent implements OnInit {
   @Input({ required: true }) ctx!: UserContext;

@@ -1,21 +1,46 @@
 <div class="doctorView">
   <div class="slots">
     <h1>Slots <button (click)="createSlot()">Create new</button></h1>
-    <ul>
-      <li *ngFor="let slot of slots">
-        ID: {{slot.id}}<br>Start: {{slot.start}}<br>End: {{slot.end}}<br>
-        <button (click)="editSlot(slot.id)">Edit</button> -
-        <button (click)="deleteSlot(slot.id)">Delete</button>
-      </li>
-    </ul>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let slot of slots">
+          <td>{{slot.id}}</td>
+          <td>{{slot.start}}</td>
+          <td>{{slot.end}}</td>
+          <td>
+            <button (click)="editSlot(slot.id)">Edit</button> - <button (click)="deleteSlot(slot.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   <div class="appointments">
     <h1>Appointments</h1>
-    <ul>
-      <li *ngFor="let appointment of appointments">
-        Slot ID: {{appointment.slotId}}<br>Start: {{appointment.start}}<br>End: {{appointment.end}}<br>
-        Patient: {{appointment.patientUsername}}
-      </li>
-    </ul>
+    <table>
+      <thead>
+        <tr>
+          <th>Slot ID</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Patient username</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let appointment of appointments">
+          <td>{{appointment.slotId}}</td>
+          <td>{{appointment.start}}</td>
+          <td>{{appointment.end}}</td>
+          <td>{{appointment.patientUsername}}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>

@@ -8,7 +8,8 @@ import { setEntities, withPromptValues } from '../common/common';
   selector: 'patient-view',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './patient-view.component.html'
+  templateUrl: './patient-view.component.html',
+  styleUrls: ['../common/table.css']
 })
 export class PatientViewComponent implements OnInit {
   @Input({ required: true }) ctx!: UserContext;
