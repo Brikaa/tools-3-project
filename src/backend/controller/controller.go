@@ -423,20 +423,28 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+func readMessages(ws *websocket.Conn, ch <-chan *redis.Message) {
+	for message := range ch {
+		ws.WriteMessage(websocket.TextMessage, []byte(message.Payload))
+	}
+}
+
 func (controller *Controller) GetAppointmentUpdates(userCtx *UserContext, ctx *g.Context) {
 	ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		return
 	}
 	defer ws.Close()
-	pubsub := controller.rdb.Subscribe(ctx, createChannelName(userCtx.ID))
+	channelName := createChannelName(userCtx.ID)
+	pubsub := controller.rdb.Subscribe(ctx, channelName)
 	defer pubsub.Close()
+	ch := pubsub.Channel()
+	go readMessages(ws, ch)
 	for {
-		msg, err := pubsub.ReceiveMessage(ctx)
+		_, _, err := ws.ReadMessage()
 		if err != nil {
-			handleInternalServerError(ctx, &err)
+			pubsub.Unsubscribe(ctx, channelName)
 			return
 		}
-		ws.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
 	}
 }
