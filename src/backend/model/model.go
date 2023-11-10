@@ -43,6 +43,6 @@ type AppointmentXSlotXPatient struct {
 
 type AppointmentXSlotXDoctor struct {
 	AppointmentXSlot
-	DoctorID       string
-	DoctorUsername string
+	DoctorID       string `json:"doctorId"`
+	DoctorUsername string `json:"doctorUsername"`
 }

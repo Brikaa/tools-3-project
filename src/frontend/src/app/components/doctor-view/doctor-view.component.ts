@@ -55,7 +55,7 @@ export class DoctorViewComponent implements OnInit {
   }
 
   async deleteSlot(id: string) {
-    const res = await sendRequest(this.ctx.token, 'DELETE', `/slots/${id}`);
+    const res = await sendRequest(this.ctx.token, 'DELETE', `slots/${id}`);
     if (!isSuccessResponse(res)) {
       return;
     }

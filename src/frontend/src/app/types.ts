@@ -28,8 +28,8 @@ export interface Slot {
 interface Appointment {
   id: string;
   slotId: string;
-  slotStart: string;
-  slotEnd: string;
+  start: string;
+  end: string;
 }
 
 export type PatientAppointment = Appointment & {

@@ -28,7 +28,8 @@ export class AppComponent implements OnInit {
     if (token) {
       const res = await sendRequest(token, 'GET', 'user');
       if (isSuccessResponse(res)) {
-        const user: User = await res.json();
+        const body: { user: User } = await res.json();
+        const user = body.user;
         this.ctx = {
           id: user.id,
           role: user.role,
