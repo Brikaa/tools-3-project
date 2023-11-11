@@ -333,8 +333,8 @@ if __name__ == "__main__":
     psa1dss1 = get_appointment_id_by_slot_id(appointments, dss1)
     action(f"Receive appointment creation via socket ({psa1dss1} created)", ws.recv)
     action(f"Delete appointment {psa1dss1}", lambda: delete_appointment(psa1dss1))
-    psa1dss1 = None
     action(f"Receive appointment deletion via socket ({psa1dss1} deleted)", ws.recv)
+    psa1dss1 = None
     ws.close()
     action(
         f"Create appointment psa1dss1",

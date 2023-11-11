@@ -70,5 +70,6 @@ func main() {
 	router.GET("/doctors", controller.Auth("patient", controller.GetDoctors))
 	router.GET("/doctors/:id/slots", controller.Auth("patient", controller.GetAvailableSlotsForDoctor))
 
+	// test233
 	router.Run(fmt.Sprintf(":%s", os.Getenv("BACKEND_PORT")))
 }
