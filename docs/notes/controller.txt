@@ -75,12 +75,15 @@
   - send to appointment.(doctorId) topic: { doctorId, ctx.id, operation: "appointmentCreated" }
 - PUT /appointments/{id} (auth patient)
   - Same business rules as PUT /appointments
+  - prevDoctorId = repo select doctorId from slot where id = req.slotId
   - updated = repo update appointment where id = req.id
   - if !updated
     - 404
   - 200
   - doctorId = repo select doctorId from slot where id = req.slotId
   - send to appointment.(doctorId) topic: { doctorId, ctx.id, operation: "appointmentUpdated" }
+  - if prevDoctorId is different
+    - send to appointment.(prevDoctorId) topic: { doctorId, ctx.id, operation: "appointmentUpdated" }
 - DELETE /appointments/{id} (auth patient)
   - doctorId = repo select doctorId from slot join appointment where appointment.id = req.id
   - updated = repo delete from appointments where id = req.id and patientId = userId

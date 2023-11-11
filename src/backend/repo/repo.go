@@ -122,7 +122,7 @@ func DeleteSlotByIdAndDoctorId(db *sql.DB, slotId string, doctorId string) (bool
 func GetSlotsByDoctorId(db *sql.DB, doctorId string) ([]*model.Slot, error) {
 	return selectAll(
 		db,
-		"SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId FROM Slot WHERE doctorId = ?",
+		"SELECT Slot.id, Slot.start, Slot.end, Slot.doctorId FROM Slot WHERE doctorId = ? ORDER BY start",
 		[]any{doctorId},
 		func(rows *sql.Rows, slot *model.Slot) error {
 			return rows.Scan(&slot.ID, &slot.Start, &slot.End, &slot.DoctorID)

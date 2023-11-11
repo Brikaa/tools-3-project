@@ -333,7 +333,6 @@ func (controller *Controller) publishMessage(
 		log.Print(err)
 		return
 	}
-
 }
 
 func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Context) {
@@ -356,6 +355,11 @@ func (controller Controller) CreateAppointment(userCtx *UserContext, ctx *g.Cont
 
 func (controller Controller) UpdateAppointment(userCtx *UserContext, ctx *g.Context) {
 	controller.withPutAppointmentBusinessRules(userCtx, ctx, func(req *PutAppointmentRequest) {
+		prevDoctorId, err := repo.GetDoctorIdByAppointmentId(controller.db, ctx.Param("id"))
+		if err != nil {
+			handleInternalServerError(ctx, &err)
+			return
+		}
 		updated, err := repo.UpdateAppointmentByIdAndPatientId(controller.db, ctx.Param("id"), userCtx.ID, req.SlotID)
 		if err != nil {
 			handleInternalServerError(ctx, &err)
@@ -372,6 +376,12 @@ func (controller Controller) UpdateAppointment(userCtx *UserContext, ctx *g.Cont
 			userCtx.ID,
 			"AppointmentUpdated",
 			func() (*string, error) { return repo.GetDoctorIdBySlotId(controller.db, req.SlotID) },
+		)
+		controller.publishMessage(
+			ctx,
+			userCtx.ID,
+			"AppointmentUpdated",
+			func() (*string, error) { return prevDoctorId, nil },
 		)
 	})
 }
