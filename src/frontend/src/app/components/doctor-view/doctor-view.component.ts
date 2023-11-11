@@ -69,7 +69,7 @@ export class DoctorViewComponent implements OnInit {
   ngOnInit() {
     this.setSlots();
     this.setAppointments();
-    const ws = new WebSocket(`ws://${API_HOST}/doctor-appointments/ws?token=${this.ctx.token}`);
+    const ws = new WebSocket(`ws://${API_HOST}/api/doctor-appointments/ws?token=${this.ctx.token}`);
     ws.addEventListener('message', (message) => {
       if (typeof message.data === 'string') {
         alert(message.data);
