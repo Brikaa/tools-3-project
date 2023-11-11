@@ -70,17 +70,22 @@ var isAlNum = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)) func(*g.Context) {
 	return func(ctx *g.Context) {
 		authHeader := ctx.GetHeader("Authorization")
-		authData := strings.Split(authHeader, " ")
-		if len(authData) != 2 {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse("Invalid authorization header"))
-			return
-		}
+		var token string
+		if authHeader != "" {
+			authData := strings.Split(authHeader, " ")
+			if len(authData) != 2 {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse("Invalid authorization header"))
+				return
+			}
 
-		scheme := authData[0]
-		token := authData[1]
-		if !strings.EqualFold(scheme, "Basic") {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Invalid authorization scheme"))
-			return
+			scheme := authData[0]
+			if !strings.EqualFold(scheme, "Basic") {
+				ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse("Invalid authorization scheme"))
+				return
+			}
+			token = authData[1]
+		} else {
+			token = ctx.Query("token")
 		}
 
 		userpass, err := base64.StdEncoding.DecodeString(token)
@@ -89,6 +94,10 @@ func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)
 			return
 		}
 		userpassData := strings.Split(string(userpass), ":")
+		if len(userpassData) != 2 {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse("Invalid authorization token"))
+			return
+		}
 		username := userpassData[0]
 		password := userpassData[1]
 
@@ -103,6 +112,7 @@ func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)
 		}
 
 		if role != "*" && user.Role != role {
+			log.Print(user.Role)
 			ctx.AbortWithStatus(http.StatusForbidden)
 			return
 		}

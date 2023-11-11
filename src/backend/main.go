@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/Brikaa/tools-3-project/src/backend/controller"
-	"github.com/gin-contrib/cors"
 	g "github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
 	"github.com/redis/go-redis/v9"
@@ -42,12 +41,6 @@ func main() {
 	fmt.Println("Successfully pinged the DBMS")
 
 	router := g.Default()
-	defaultCorsConfig := cors.DefaultConfig()
-	defaultCorsConfig.AllowAllOrigins = true
-	defaultCorsConfig.AllowHeaders = append(defaultCorsConfig.AllowHeaders, "Authorization")
-	defaultCorsConfig.AllowCredentials = true
-	defaultCorsConfig.AllowWebSockets = true
-	router.Use(cors.New(defaultCorsConfig))
 	router.GET("/health", health)
 
 	controller := controller.CreateController(db, rdb)
@@ -70,6 +63,5 @@ func main() {
 	router.GET("/doctors", controller.Auth("patient", controller.GetDoctors))
 	router.GET("/doctors/:id/slots", controller.Auth("patient", controller.GetAvailableSlotsForDoctor))
 
-	// test233
 	router.Run(fmt.Sprintf(":%s", os.Getenv("BACKEND_PORT")))
 }

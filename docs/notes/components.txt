@@ -95,6 +95,11 @@
   - onInit()
     - setSlots()
     - setAppointments()
+    - websocket subscribe to /appointments
+      - on message
+        - notify message
+        - setSlots()
+        - setAppointments()
   - Slots (for slot in slots)
     - "create new" button at top
       - createSlot()
