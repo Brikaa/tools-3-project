@@ -26,6 +26,8 @@ To create the database schema (needed the first time you run the project)
 make migrate
 ```
 
+Access the app at `clinic.localhost`
+
 # Tech stack
 
 - MySQL database
