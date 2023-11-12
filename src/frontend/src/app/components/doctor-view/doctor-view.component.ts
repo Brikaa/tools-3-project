@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { DoctorAppointment, Slot, UserContext } from '../../types';
 import { setEntities, withPromptValues } from '../common/common';
 import { isSuccessResponse, sendRequest } from '../../httpClient';
@@ -11,10 +11,11 @@ import { isSuccessResponse, sendRequest } from '../../httpClient';
   templateUrl: './doctor-view.component.html',
   styleUrls: ['../common/table.css']
 })
-export class DoctorViewComponent implements OnInit {
+export class DoctorViewComponent implements OnInit, OnDestroy {
   @Input({ required: true }) ctx!: UserContext;
   slots: Slot[] = [];
   appointments: DoctorAppointment[] = [];
+  ws: WebSocket | null = null;
 
   setSlots() {
     setEntities(this.ctx, this.slots, 'slots', (body) => {
@@ -68,13 +69,19 @@ export class DoctorViewComponent implements OnInit {
   ngOnInit() {
     this.setSlots();
     this.setAppointments();
-    const ws = new WebSocket(`ws://${location.host}/api/doctor-appointments/ws?token=${this.ctx.token}`);
-    ws.addEventListener('message', (message) => {
+    this.ws = new WebSocket(
+      `ws://${location.host}/api/doctor-appointments/ws?token=${this.ctx.token}`
+    );
+    this.ws.addEventListener('message', (message) => {
       if (typeof message.data === 'string') {
         alert(message.data);
       }
       this.setSlots();
       this.setAppointments();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.ws?.close();
   }
 }
