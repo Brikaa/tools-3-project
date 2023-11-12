@@ -5,7 +5,7 @@ import datetime
 import os
 import asyncio
 
-BASE = f"http://backend:{os.environ['BACKEND_PORT']}"
+BASE = f"http://{os.environ['BACKEND_HOST']}:{os.environ['BACKEND_PORT']}"
 token = ""
 headers = {"Content-Type": "application/json"}
 
@@ -322,7 +322,9 @@ if __name__ == "__main__":
     dss1 = slots[0]["id"]
     action(f"Signup patient ps", lambda: signup("ps", "ps123", "patient"))
 
-    ws = create_connection(f"ws://backend:{os.environ['BACKEND_PORT']}/doctor-appointments/ws?token={token}")
+    ws = create_connection(
+        f"ws://{os.environ['BACKEND_HOST']}:{os.environ['BACKEND_PORT']}/doctor-appointments/ws?token={token}"
+    )
     action(f"Login ps", lambda: login("ps", "ps123"))
     action(
         f"Create appointment psa1dss1",

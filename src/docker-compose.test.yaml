@@ -1,7 +1,8 @@
 services:
-  backend_tester:
-    container_name: backend_tester
-    image: backend_tester
+  t3p-backend-test:
+    container_name: t3p-backend-test
+    image: t3p-backend-test
     build: ./backend-tests
     environment:
+      - BACKEND_HOST=${BACKEND_HOST}
       - BACKEND_PORT=${BACKEND_PORT}

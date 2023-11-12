@@ -1,15 +1,16 @@
 server {
-  listen 80;
-  listen [::]:80;
-  server_name clinic.localhost;
+  listen ${FRONTEND_PORT};
+  listen [::]:${FRONTEND_PORT};
+  server_name ${FRONTEND_DOMAIN};
   location / {
     root /var/www/html;
     try_files $uri /index.html;
   }
   location /api/ {
-    proxy_pass http://backend:8000/;
+    proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT}/;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Origin "";
     proxy_set_header Connection 'Upgrade';
     proxy_set_header Host $host;
     proxy_cache_bypass $http_upgrade;

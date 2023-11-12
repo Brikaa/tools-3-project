@@ -1,5 +1,6 @@
 -include .env
-docker_compose_test = docker compose -f docker-compose.test.yaml
+docker_or_podman = . ./container && docker
+docker_compose_test = $(docker_or_podman) compose -f docker-compose.test.yaml
 
 dev:
 	./create-env.sh
@@ -8,23 +9,24 @@ dev:
 	make logs
 
 cache:
-	docker build --target build -t backend_builder ./backend
-	docker build --target build -t frontend_builder ./frontend
+	$(docker_or_podman) build --target build -t t3p-backend-builder ./backend
+	$(docker_or_podman) build --target build -t t3p-frontend-builder ./frontend
 
 run:
-	docker compose up --build -d
+	$(docker_or_podman) compose up --build -d
 
 logs:
-	docker compose logs -f
+	$(docker_or_podman) compose logs -f
 
 stop:
-	docker compose down
+	$(docker_or_podman) compose down
 
 migrate:
-	docker compose exec -it database /bin/sh -c "mysql app -uroot -p${MYSQL_ROOT_PASSWORD} < /initial.sql"
+	$(docker_or_podman) compose exec -it t3p-database \
+	/bin/sh -c "mysql app -uroot -p${MYSQL_ROOT_PASSWORD} < /initial.sql"
 
 mysql:
-	docker compose exec -it database mysql -hdatabase -u${MYSQL_USER} -p${MYSQL_PASSWORD} -Dapp
+	$(docker_or_podman) compose exec -it t3p-database mysql -h ${MYSQL_HOST} -u${MYSQL_USER} -p${MYSQL_PASSWORD} -Dapp
 
 test:
 	make migrate

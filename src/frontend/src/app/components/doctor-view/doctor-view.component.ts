@@ -3,7 +3,6 @@ import { Component, Input, OnInit } from '@angular/core';
 import { DoctorAppointment, Slot, UserContext } from '../../types';
 import { setEntities, withPromptValues } from '../common/common';
 import { isSuccessResponse, sendRequest } from '../../httpClient';
-import { API_HOST } from '../../config';
 
 @Component({
   selector: 'doctor-view',
@@ -69,7 +68,7 @@ export class DoctorViewComponent implements OnInit {
   ngOnInit() {
     this.setSlots();
     this.setAppointments();
-    const ws = new WebSocket(`ws://${API_HOST}/api/doctor-appointments/ws?token=${this.ctx.token}`);
+    const ws = new WebSocket(`ws://${location.host}/api/doctor-appointments/ws?token=${this.ctx.token}`);
     ws.addEventListener('message', (message) => {
       if (typeof message.data === 'string') {
         alert(message.data);

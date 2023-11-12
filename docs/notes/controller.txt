@@ -98,7 +98,6 @@
   - slots = select Slot where Slot.doctorId = req.id and Appointment.id = null left join Appointment
 
 - Nice to have
-  - Nginx picks up BACKEND_PORT from env variables
   - Transactions
   - Abstract the time_format
   - Abstraction for CRUD methods to avoid boilerplate
@@ -110,3 +109,4 @@
   - Patient can reserve an appointment in the past if the doctor has a slot in the past
   - Patient appointments can overlap
   - When editing a slot, it can't overlap with its old version
+  - Doctor is notified two times if a patient edits the appointment to make the target doctor = previous doctor

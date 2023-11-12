@@ -112,7 +112,6 @@ func (controller Controller) Auth(role string, fn func(*UserContext, *g.Context)
 		}
 
 		if role != "*" && user.Role != role {
-			log.Print(user.Role)
 			ctx.AbortWithStatus(http.StatusForbidden)
 			return
 		}

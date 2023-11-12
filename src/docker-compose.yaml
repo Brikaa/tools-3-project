@@ -1,49 +1,57 @@
 volumes:
-  database:
+  t3p-database:
     external: false
 
 services:
-  frontend:
-    container_name: frontend
-    image: frontend
+  t3p-frontend:
+    container_name: t3p-frontend
+    image: t3p-frontend
     build: ./frontend
     ports:
-      - '80:80'
+      - '${FRONTEND_PORT}:${FRONTEND_PORT}'
+    environment:
+      - FRONTEND_DOMAIN=${FRONTEND_DOMAIN}
+      - FRONTEND_PORT=${FRONTEND_PORT}
+      - BACKEND_HOST=${BACKEND_HOST}
+      - BACKEND_PORT=${BACKEND_PORT}
     depends_on:
-      - backend
-  backend:
-    container_name: backend
-    image: backend
+      - t3p-backend
+  t3p-backend:
+    container_name: t3p-backend
+    hostname: ${BACKEND_HOST}
+    image: t3p-backend
     build: ./backend
     depends_on:
-      database:
+      t3p-database:
         condition: service_healthy
-      messaging:
+      t3p-messaging:
         condition: service_started
     environment:
       - MYSQL_DATABASE=app
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PORT=${MYSQL_PORT}
       - BACKEND_PORT=${BACKEND_PORT}
-  database:
-    container_name: database
-    image: database
+      - MESSAGING_HOST=${MESSAGING_HOST}
+  t3p-database:
+    container_name: t3p-database
+    hostname: ${MYSQL_HOST}
+    image: t3p-database
     build: ./db
     volumes:
-      - database:/var/lib/mysql
+      - t3p-database:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=app
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "database"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "${MYSQL_HOST}"]
       interval: 5s
       timeout: 10s
       retries: 10
-  messaging:
-    container_name: messaging
+  t3p-messaging:
+    container_name: t3p-messaging
+    hostname: ${MESSAGING_HOST}
     # Like RabbitMQ and Kafka
     image: redis:7.2.3-alpine3.18

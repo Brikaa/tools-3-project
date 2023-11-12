@@ -22,12 +22,12 @@ func main() {
 		User:      os.Getenv("MYSQL_USER"),
 		Passwd:    os.Getenv("MYSQL_PASSWORD"),
 		Net:       "tcp",
-		Addr:      fmt.Sprintf("%s:%s", os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT")),
+		Addr:      fmt.Sprintf("%s:3306", os.Getenv("MYSQL_HOST")),
 		DBName:    "app",
 		ParseTime: true,
 	}
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "messaging:6379",
+		Addr:     fmt.Sprintf("%s:6379", os.Getenv("MESSAGING_HOST")),
 		Password: "",
 		DB:       0,
 	})

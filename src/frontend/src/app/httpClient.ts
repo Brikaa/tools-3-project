@@ -1,5 +1,3 @@
-import { API_URL } from './config';
-
 export const sendRequest = async (
   token: string | null,
   method: 'POST' | 'GET' | 'PUT' | 'DELETE',
@@ -15,7 +13,7 @@ export const sendRequest = async (
   const requestOptions =
     body === null ? { method, headers } : { method, headers, body: JSON.stringify(body) };
 
-  const response = await fetch(API_URL + endpoint, requestOptions);
+  const response = await fetch('/api/' + endpoint, requestOptions);
   if (response.status === 500) {
     alert('An internal error has occurred');
   } else if (response.status === 400) {
