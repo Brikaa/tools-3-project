@@ -455,7 +455,9 @@ func (controller *Controller) GetAppointmentUpdates(userCtx *UserContext, ctx *g
 	}
 	defer ws.Close()
 	channelName := createChannelName(userCtx.ID)
+	log.Print("Before subscription")
 	pubsub := controller.rdb.Subscribe(ctx, channelName)
+	log.Print("After subscription")
 	defer pubsub.Close()
 	ch := pubsub.Channel()
 	go readMessages(ws, ch)
