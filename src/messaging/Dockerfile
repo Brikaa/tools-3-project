@@ -1,10 +1,9 @@
-FROM mysql:8.2.0
+FROM redis:7.2.3-alpine3.18
 
 RUN adduser \
   --no-create-home \
   --system \
   --shell /usr/sbin/nologin \
-  db-user
+  messaging-runner
 
-USER db-user
-COPY ./initial.sql /initial.sql
+USER messaging-runner

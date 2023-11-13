@@ -8,6 +8,14 @@ RUN ["go", "build", "-o", "bin/backend"]
 
 FROM alpine:3.18
 
+RUN adduser \
+  --no-create-home \
+  --system \
+  --shell /usr/sbin/nologin \
+  backend-runner
+
 WORKDIR /app
 COPY --from=build /app/bin/backend /app
+
+USER backend-runner
 CMD ["/app/backend"]

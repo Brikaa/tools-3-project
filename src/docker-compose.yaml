@@ -54,4 +54,5 @@ services:
     container_name: t3p-messaging
     hostname: ${MESSAGING_HOST}
     # Like RabbitMQ and Kafka
-    image: redis:7.2.3-alpine3.18
+    image: t3p-messaging
+    build: ./messaging
