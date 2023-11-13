@@ -6,5 +6,5 @@ RUN adduser \
   --shell /usr/sbin/nologin \
   db-user
 
-USER db-user
 COPY ./initial.sql /initial.sql
+USER db-user
