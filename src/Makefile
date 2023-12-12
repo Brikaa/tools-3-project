@@ -23,7 +23,7 @@ stop:
 
 migrate:
 	$(docker_or_podman) compose exec -it t3p-database \
-	/bin/sh -c "mysql app -uroot -p${MYSQL_ROOT_PASSWORD} < /initial.sql"
+	/bin/sh -c "mysql app -uroot -p${MYSQL_ROOT_PASSWORD} < /docker-entrypoint-initdb.d/schema.sql"
 
 mysql:
 	$(docker_or_podman) compose exec -it t3p-database mysql -h ${MYSQL_HOST} -u${MYSQL_USER} -p${MYSQL_PASSWORD} -Dapp

@@ -1,6 +1,8 @@
 volumes:
   t3p-database:
     external: false
+  t3p-messaging:
+    external: false
 
 services:
   t3p-frontend:
@@ -56,3 +58,5 @@ services:
     # Like RabbitMQ and Kafka
     image: t3p-messaging
     build: ./messaging
+    volumes:
+      - t3p-messaging:/data

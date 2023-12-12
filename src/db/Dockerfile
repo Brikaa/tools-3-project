@@ -6,5 +6,5 @@ RUN adduser \
   --shell /usr/sbin/nologin \
   db-user
 
-COPY ./initial.sql /initial.sql
+COPY ./schema.sql /docker-entrypoint-initdb.d/
 USER db-user

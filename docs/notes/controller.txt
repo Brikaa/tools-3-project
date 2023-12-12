@@ -98,6 +98,8 @@
   - slots = select Slot where Slot.doctorId = req.id and Appointment.id = null left join Appointment
 
 - Nice to have
+  - Dynamic db and messaging port
+  - Auto migration in Dockerfile
   - Transactions
   - Abstract the time_format
   - Abstraction for CRUD methods to avoid boilerplate

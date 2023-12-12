@@ -27,12 +27,6 @@ cd src
 make dev
 ```
 
-To create the database schema (needed the first time you run the project):
-
-```bash
-make migrate
-```
-
 Access the app at `clinic.localhost:4000` (or whatever you configured frontend host to).
 
 # Configuration
