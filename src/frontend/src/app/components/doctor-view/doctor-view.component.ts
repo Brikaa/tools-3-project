@@ -69,8 +69,9 @@ export class DoctorViewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setSlots();
     this.setAppointments();
+    const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
     this.ws = new WebSocket(
-      `ws://${location.host}/api/doctor-appointments/ws?token=${this.ctx.token}`
+      `${protocol}://${location.host}/api/doctor-appointments/ws?token=${this.ctx.token}`
     );
     this.ws.addEventListener('message', (message) => {
       if (typeof message.data === 'string') {
