@@ -6,10 +6,6 @@ RUN ["npm", "ci"]
 COPY . .
 RUN ["npx", "ng", "build"]
 
-FROM nginx:1.25-alpine3.18
-RUN touch /var/run/nginx.pid && \
-  chown -R nginx:nginx /var/cache/nginx /var/run/nginx.pid &&\
-  chown -R nginx:nginx /etc/nginx/conf.d
-USER nginx
+FROM nginxinc/nginx-unprivileged:alpine3.18-perl
 COPY --chown=nginx:nginx ./nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --chown=nginx:nginx --from=build /app/dist/frontend/browser /var/www/html/
