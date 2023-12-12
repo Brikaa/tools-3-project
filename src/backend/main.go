@@ -18,27 +18,29 @@ func health(c *g.Context) {
 }
 
 func main() {
-	cfg := mysql.Config{
+	mySqlCfg := mysql.Config{
 		User:      os.Getenv("MYSQL_USER"),
 		Passwd:    os.Getenv("MYSQL_PASSWORD"),
 		Net:       "tcp",
-		Addr:      fmt.Sprintf("%s:3306", os.Getenv("MYSQL_HOST")),
+		Addr:      fmt.Sprintf("%s:%s", os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT")),
 		DBName:    "app",
 		ParseTime: true,
 	}
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:6379", os.Getenv("MESSAGING_HOST")),
+	redisCfg := redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", os.Getenv("MESSAGING_HOST"), os.Getenv("MESSAGING_PORT")),
 		Password: "",
 		DB:       0,
-	})
-	db, err := sql.Open("mysql", cfg.FormatDSN())
+	}
+	log.Printf("MySQL config: %v\nRedis config: %v\n", mySqlCfg, redisCfg)
+	rdb := redis.NewClient(&redisCfg)
+	db, err := sql.Open("mysql", mySqlCfg.FormatDSN())
 	if err != nil {
 		log.Fatal(err)
 	}
 	if err := db.Ping(); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Successfully pinged the DBMS")
+	log.Println("Successfully pinged the DBMS")
 
 	router := g.Default()
 	router.GET("/health", health)
