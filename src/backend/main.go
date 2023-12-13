@@ -65,5 +65,7 @@ func main() {
 	router.GET("/doctors", controller.Auth("patient", controller.GetDoctors))
 	router.GET("/doctors/:id/slots", controller.Auth("patient", controller.GetAvailableSlotsForDoctor))
 
-	router.Run(fmt.Sprintf(":%s", os.Getenv("BACKEND_PORT")))
+	backendPort := os.Getenv("BACKEND_PORT")
+	log.Printf("Ready to listen on port: %s", backendPort)
+	router.Run(fmt.Sprintf(":%s", backendPort))
 }
