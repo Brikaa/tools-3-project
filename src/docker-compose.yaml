@@ -7,6 +7,8 @@ volumes:
 services:
   t3p-frontend:
     build: ./frontend
+    networks:
+      - t3p-api-network
     ports:
       - '${FRONTEND_PORT}:${FRONTEND_PORT}'
     environment:
@@ -21,6 +23,10 @@ services:
   t3p-backend:
     hostname: ${BACKEND_HOST}
     build: ./backend
+    networks:
+      - t3p-api-network
+      - t3p-database-network
+      - t3p-messaging-network
     depends_on:
       t3p-database:
         condition: service_healthy
@@ -42,6 +48,8 @@ services:
     build: ./db
     volumes:
       - t3p-database:/var/lib/mysql
+    networks:
+      - t3p-database-network
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=app
@@ -58,8 +66,15 @@ services:
   t3p-messaging:
     hostname: ${MESSAGING_HOST}
     build: ./messaging
+    networks:
+      - t3p-messaging-network
     volumes:
       - t3p-messaging:/data
     command: --port ${MESSAGING_PORT}
     expose:
       - "${MESSAGING_PORT}"
+
+networks:
+  t3p-messaging-network: {}
+  t3p-database-network: {}
+  t3p-api-network: {}

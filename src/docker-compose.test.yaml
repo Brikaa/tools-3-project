@@ -6,3 +6,9 @@ services:
     environment:
       - BACKEND_HOST=${BACKEND_HOST}
       - BACKEND_PORT=${BACKEND_PORT}
+    networks:
+      - src_t3p-api-network
+
+networks:
+  src_t3p-api-network:
+    external: true
